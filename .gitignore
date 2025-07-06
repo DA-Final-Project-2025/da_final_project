@@ -1,0 +1,60 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Flask instance folder
+instance/
+*.db
+*.sqlite3
+
+# Env files
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Logs
+*.log
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# pycache, build, dist
+build/
+dist/
+*.egg-info/
+
+# Upload folder (tuỳ chỉnh nếu bạn dùng)
+uploads/
+tmp/
+media/
+
+# VSCode
+.vscode/
+.history/
+
+# Testing artifacts
+.coverage
+.tox/
+htmlcov/
+pytest_cache/
+
+# MyPy / Pyre type checkers
+.mypy_cache/
+.pyre/
+
+# static dir
+/uploads/*
+!/uploads/.gitkeep
+
+/static/*
+!/static/.gitkeep
