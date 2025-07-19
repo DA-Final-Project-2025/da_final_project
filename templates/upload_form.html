@@ -1,0 +1,18 @@
+<h2>Upload dữ liệu sản phẩm</h2>
+<form action="/analyze" method="post" enctype="multipart/form-data">
+    <label>Upload file CSV:</label><br>
+    <input type="file" name="file" required><br><br>
+
+    <input type="submit" value="Phân tích">
+</form>
+
+<div id="loading" style="display:none;">
+    <div class="spinner-border text-primary" role="status"></div>
+    <span>Đang phân tích dữ liệu...</span>
+</div>
+
+<script>
+document.querySelector("form").addEventListener("submit", function() {
+    document.getElementById("loading").style.display = "block";
+});
+</script>

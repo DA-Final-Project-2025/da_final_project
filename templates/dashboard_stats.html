@@ -1,0 +1,61 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-success mb-1"><i class="fa-solid fa-chart-column"></i> Dashboard thống kê dữ liệu</h2>
+        <span class="badge bg-info text-dark me-2">File: {{ filename }}</span>
+        <span class="badge bg-warning text-dark">Số dòng: {{ nrows }}</span>
+    </div>
+</div>
+<div class="row mb-4">
+    {% for col in columns %}
+    {% if stats[col] %}
+    <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+        <div class="card border-0 shadow-sm stat-card h-100">
+            <div class="card-body text-center">
+                <div class="fw-bold text-secondary mb-1">{{ col }}</div>
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <span class="stat-label">Mean</span>
+                    <span class="stat-value text-success fw-bold">{{ '{:,.2f}'.format(stats[col]['mean']) }}</span>
+                </div>
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <span class="stat-label">Median</span>
+                    <span class="stat-value text-info fw-bold">{{ '{:,.2f}'.format(stats[col]['median']) }}</span>
+                </div>
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <span class="stat-label">Min</span>
+                    <span class="stat-value text-danger">{{ '{:,.2f}'.format(stats[col]['min']) }}</span>
+                </div>
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <span class="stat-label">Max</span>
+                    <span class="stat-value text-warning fw-bold">{{ '{:,.2f}'.format(stats[col]['max']) }}</span>
+                </div>
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <span class="stat-label">Std</span>
+                    <span class="stat-value text-secondary">{{ '{:,.2f}'.format(stats[col]['std']) }}</span>
+                </div>
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <span class="stat-label">Count</span>
+                    <span class="stat-value text-dark">{{ '{:,}'.format(stats[col]['count']) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+<div class="card shadow-lg border-0 mb-4">
+    <div class="card-body">
+        <h4 class="mb-3 text-primary"><i class="fa-solid fa-chart-box"></i> Boxplot cho các thuộc tính số</h4>
+        <div class="row">
+            {% for col in columns %}
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success-subtle text-success fw-bold">{{ col }}</div>
+                    <div class="card-body">
+                        <div class="boxplot-svg">{{ boxplots[col]|safe }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
