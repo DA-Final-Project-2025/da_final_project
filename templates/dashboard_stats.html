@@ -1,8 +1,8 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="fw-bold text-success mb-1"><i class="fa-solid fa-chart-column"></i> Dashboard thống kê dữ liệu</h2>
-        <span class="badge bg-info text-dark me-2">File: {{ filename }}</span>
-        <span class="badge bg-warning text-dark">Số dòng: {{ nrows }}</span>
+        <h2 class="fw-bold mb-1" style="color:#2563eb;"><i class="fa-solid fa-chart-column me-2"></i>Dashboard thống kê dữ liệu</h2>
+        <span class="badge bg-primary text-white me-2"><i class="fas fa-file me-1"></i>{{ filename }}</span>
+        <span class="badge bg-secondary"><i class="fas fa-list me-1"></i>{{ '{:,}'.format(nrows) }} dòng</span>
     </div>
 </div>
 <div class="row mb-4">
@@ -11,30 +11,26 @@
     <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
         <div class="card border-0 shadow-sm stat-card h-100">
             <div class="card-body text-center">
-                <div class="fw-bold text-secondary mb-1">{{ col }}</div>
-                <div class="d-flex justify-content-center align-items-center gap-2">
+                <div class="fw-semibold text-dark mb-1" style="font-size:1.05rem;">{{ col }}</div>
+                <div class="d-flex justify-content-center align-items-center gap-2 mb-1">
                     <span class="stat-label">Mean</span>
-                    <span class="stat-value text-success fw-bold">{{ '{:,.2f}'.format(stats[col]['mean']) }}</span>
+                    <span class="stat-value">{{ '{:,.2f}'.format(stats[col]['mean']) }}</span>
                 </div>
-                <div class="d-flex justify-content-center align-items-center gap-2">
+                <div class="d-flex justify-content-center align-items-center gap-2 mb-1">
                     <span class="stat-label">Median</span>
-                    <span class="stat-value text-info fw-bold">{{ '{:,.2f}'.format(stats[col]['median']) }}</span>
+                    <span class="stat-value">{{ '{:,.2f}'.format(stats[col]['median']) }}</span>
                 </div>
-                <div class="d-flex justify-content-center align-items-center gap-2">
+                <div class="d-flex justify-content-center align-items-center gap-2 mb-1">
                     <span class="stat-label">Min</span>
-                    <span class="stat-value text-danger">{{ '{:,.2f}'.format(stats[col]['min']) }}</span>
+                    <span class="stat-value">{{ '{:,.2f}'.format(stats[col]['min']) }}</span>
                 </div>
-                <div class="d-flex justify-content-center align-items-center gap-2">
+                <div class="d-flex justify-content-center align-items-center gap-2 mb-1">
                     <span class="stat-label">Max</span>
-                    <span class="stat-value text-warning fw-bold">{{ '{:,.2f}'.format(stats[col]['max']) }}</span>
+                    <span class="stat-value">{{ '{:,.2f}'.format(stats[col]['max']) }}</span>
                 </div>
                 <div class="d-flex justify-content-center align-items-center gap-2">
                     <span class="stat-label">Std</span>
-                    <span class="stat-value text-secondary">{{ '{:,.2f}'.format(stats[col]['std']) }}</span>
-                </div>
-                <div class="d-flex justify-content-center align-items-center gap-2">
-                    <span class="stat-label">Count</span>
-                    <span class="stat-value text-dark">{{ '{:,}'.format(stats[col]['count']) }}</span>
+                    <span class="stat-value">{{ '{:,.2f}'.format(stats[col]['std']) }}</span>
                 </div>
             </div>
         </div>
@@ -48,14 +44,42 @@
         <div class="row">
             {% for col in columns %}
             <div class="col-md-6 mb-4">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-success-subtle text-success fw-bold">{{ col }}</div>
-                    <div class="card-body">
-                        <div class="boxplot-svg">{{ boxplots[col]|safe }}</div>
+                <div class="card border-0 shadow-sm boxplot-card">
+                    <div class="card-header bg-white border-bottom-0 px-3 py-2" style="font-size:1rem; font-weight:500; color:#2563eb;">
+                        <i class="fa-solid fa-chart-box me-2"></i>{{ col }}
+                    </div>
+                    <div class="card-body p-3 boxplot-svg" style="background:#f8fafc; border-radius:0 0 10px 10px;">
+                        {{ boxplots[col]|safe }}
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
-    </div>
-</div>
+        <style>
+            .boxplot-card {
+                border-radius: 10px;
+                box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+                margin-bottom: 1rem;
+            }
+            .boxplot-card .card-header {
+                border-bottom: 1px solid #e5e7eb;
+                background: #fff;
+            }
+            .boxplot-svg {
+                background: #f8fafc;
+                border-radius: 0 0 10px 10px;
+                min-height: 340px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .boxplot-svg svg {
+                width: 100%;
+                height: 320px;
+                max-width: 100%;
+            }
+            @media (max-width: 768px) {
+                .boxplot-card .card-header { font-size: 0.95rem; }
+                .boxplot-svg svg { height: 220px; }
+            }
+        </style>

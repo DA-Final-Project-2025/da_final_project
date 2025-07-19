@@ -28,37 +28,76 @@
         </div>
     </div>
     <style>
-        body {
-            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        :root {
+            --primary-color: #2563eb;
+            --text-primary: #1a1f36;
+            --text-secondary: #4b5563;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
         }
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        .container { max-width: 900px; }
         .card {
-            transition: box-shadow 0.3s;
+            background: var(--bg-card);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+            transition: box-shadow 0.2s;
         }
         .card:hover {
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 16px rgba(16,24,40,0.10);
         }
-        .btn-primary {
-            background: linear-gradient(90deg,#0d6efd 0%,#5dade2 100%);
-            border: none;
-            font-weight: 500;
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--primary-color);
             letter-spacing: 0.5px;
         }
+        .lead {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+        }
+        .btn-primary {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+        }
         .btn-primary:hover {
-            background: linear-gradient(90deg,#5dade2 0%,#0d6efd 100%);
+            background: #1d4ed8;
+            border-color: #1d4ed8;
         }
         label {
             font-weight: 500;
-            color: #0d6efd;
+            color: var(--primary-color);
         }
         input[type="file"] {
             border-radius: 8px;
-            border: 1px solid #d6eaff;
-            padding: 8px;
-            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            background: #f9fafb;
+            font-size: 1rem;
+        }
+        .fa-chart-line {
+            color: var(--primary-color);
+        }
+        .card-body {
+            padding: 2rem;
+        }
+        .text-muted {
+            color: #6b7280 !important;
         }
         @media (max-width: 768px) {
             .card-body { padding: 1rem !important; }
             .container { padding: 1rem !important; }
+            h2 { font-size: 1.2rem; }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

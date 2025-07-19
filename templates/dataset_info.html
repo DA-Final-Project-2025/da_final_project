@@ -49,10 +49,52 @@
                             <a href="/" class="btn btn-primary px-4"><i class="fa-solid fa-arrow-left"></i> Về trang chủ</a>
                         </div>
                     </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --text-primary: #1a1f36;
+            --text-secondary: #4b5563;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+        }
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+        }
+        table {
+            font-size: 0.95rem;
+        }
+        th, td {
+            vertical-align: middle !important;
+            padding: 0.75rem 1rem;
+        }
+        thead th {
+            background: #f9fafb;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        tbody tr:hover td {
+            background: #f8fafc;
+        }
+        @media (max-width: 768px) {
+            .card-body { padding: 1rem !important; }
+            .container { padding: 1rem !important; }
+        }
+    </style>
 </body>
 </html>

@@ -4,40 +4,188 @@
     <title>Thống kê mô tả sản phẩm Tiki</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --text-primary: #1a1f36;
+            --text-secondary: #4b5563;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+        }
+        
+        body { 
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            color: var(--text-primary);
+            background-color: var(--bg-page);
+            min-height: 100vh;
+            font-size: 0.925rem;
+        }
+
+        .container { max-width: 1200px; }
+        
+        .card { 
+            background: var(--bg-card);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1), 0 1px 2px rgba(16, 24, 40, 0.06);
+        }
+        
+        h2 { 
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .badge {
+            padding: 0.5em 0.75em;
+            font-weight: 500;
+            border-radius: 6px;
+        }
+        
+        .bg-primary {
+            background-color: #3b82f6 !important;
+        }
+        
+        .table { 
+            --bs-table-hover-bg: #f8fafc;
+            margin-bottom: 0;
+        }
+        
+        .table th { 
+            background: #f9fafb;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 1rem;
+        }
+        
+        .table td {
+            padding: 1rem;
+            border-bottom-color: var(--border-color);
+            vertical-align: middle;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .font-monospace {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.925rem;
+            color: var(--text-primary);
+        }
+        
+        .btn {
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1);
+        }
+        
+        .btn-secondary {
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+            background: var(--bg-card);
+        }
+        
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .badge.bg-light-subtle {
+            background-color: #f3f4f6 !important;
+            color: var(--text-secondary) !important;
+            border: 1px solid var(--border-color);
+        }
+        
+        .table-responsive {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Cải thiện cho các thiết bị di động */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .card-body { padding: 1rem; }
+            .table th, .table td { padding: 0.75rem; }
+            h2 { font-size: 1.25rem; }
+            .btn { width: 100%; margin: 0.5rem 0; }
+        }
+    </style>
 </head>
-<body class="bg-light" style="background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); min-height: 100vh;">
+<body style="background-color: #f5f7fa; min-height: 100vh;">
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <div class="card shadow-lg border-0 mb-4">
-                    <div class="card-body">
-                        <h2 class="fw-bold text-success mb-3"><i class="fa-solid fa-table"></i> Thống kê mô tả</h2>
-                        <span class="badge bg-info text-dark me-2">File: {{ filename }}</span>
-                        <span class="badge bg-warning text-dark">Số dòng: {{ nrows }}</span>
-                        <div class="table-responsive mt-4">
-                            <table class="table table-hover table-bordered align-middle" style="font-size:1.15rem;">
-                                <thead class="table-primary">
-                                    <tr class="text-center">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="fw-bold mb-0 text-dark">
+                                <i class="fa-solid fa-table-cells me-2"></i>Thống kê mô tả
+                            </h2>
+                            <div>
+                                <span class="badge bg-primary text-white me-2">
+                                    <i class="fas fa-file me-1"></i>{{ filename }}
+                                </span>
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-list me-1"></i>{{ '{:,}'.format(nrows) }} dòng
+                                </span>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered align-middle">
+                                <thead>
+                                    <tr class="text-center bg-white">
                                         <th>Thuộc tính</th>
                                         <th>Mean</th>
                                         <th>Median</th>
                                         <th>Min</th>
                                         <th>Max</th>
                                         <th>Std</th>
-                                        <th>Count</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                {% set units = {
+                                    'original_price': '(VND)',
+                                    'price': '(VND)',
+                                    'review_count': '(Lượt)',
+                                    'rating_average': '(Điểm)',
+                                    'favourite_count': '(Lượt)',
+                                    'number_of_images': '(Ảnh)',
+                                    'vnd_cashback': '(VND)',
+                                    'quantity_sold': '(SP)'
+                                } %}
                                 {% for col in columns %}
                                     {% if stats[col] %}
                                     <tr class="text-center table-row-num">
-                                        <td class="fw-bold text-secondary">{{ col }}</td>
-                                        <td class="text-success fw-bold">{{ '{:,.2f}'.format(stats[col]['mean']) }}</td>
-                                        <td class="text-info fw-bold">{{ '{:,.2f}'.format(stats[col]['median']) }}</td>
-                                        <td class="text-danger">{{ '{:,.2f}'.format(stats[col]['min']) }}</td>
-                                        <td class="bg-warning-subtle fw-bold text-warning">{{ '{:,.2f}'.format(stats[col]['max']) }}</td>
-                                        <td class="text-secondary">{{ '{:,.2f}'.format(stats[col]['std']) }}</td>
-                                        <td class="text-dark">{{ '{:,}'.format(stats[col]['count']) }}</td>
+                                        <td class="fw-semibold text-dark">
+                                            {{ col }}
+                                            <span class="badge bg-light-subtle text-secondary ms-1 fw-normal" style="font-size: 0.85em">
+                                                {{ units.get(col, '') }}
+                                            </span>
+                                        </td>
+                                        <td class="font-monospace">{{ '{:,.2f}'.format(stats[col]['mean']) }}</td>
+                                        <td class="font-monospace">{{ '{:,.2f}'.format(stats[col]['median']) }}</td>
+                                        <td class="font-monospace">{{ '{:,.2f}'.format(stats[col]['min']) }}</td>
+                                        <td class="font-monospace">{{ '{:,.2f}'.format(stats[col]['max']) }}</td>
+                                        <td class="font-monospace">{{ '{:,.2f}'.format(stats[col]['std']) }}</td>
                                     </tr>
                                     {% endif %}
                                 {% endfor %}
@@ -45,19 +193,19 @@
                             </table>
                         </div>
                         <div class="text-center mt-4">
-                            <a href="/boxplot" class="btn btn-primary px-4"><i class="fa-solid fa-chart-box"></i> Xem Boxplot</a>
-                            <a href="/dashboard" class="btn btn-secondary px-4 ms-2"><i class="fa-solid fa-arrow-left"></i> Về Dashboard</a>
+                            <a href="/dashboard" class="btn btn-secondary">
+                                <i class="fa-solid fa-arrow-left me-2"></i>Về Dashboard
+                            </a>
+                            <a href="/boxplot" class="btn btn-primary ms-md-2">
+                                <i class="fa-solid fa-chart-box me-2"></i>Xem Boxplot
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <style>
-        .table-row-num:hover td { background: #eaf6ff !important; }
-        .table th, .table td { vertical-align: middle !important; }
-        .bg-warning-subtle { background: #fffbe6 !important; }
-    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

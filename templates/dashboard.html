@@ -51,16 +51,50 @@
         </div>
     </div>
     <style>
-        .sidebar { border-right: 1px solid #e0eafc; background: #fff; }
-        .sidebar .nav-link { font-size: 1.1rem; padding: 12px 24px; border-radius: 8px; }
-        .sidebar .nav-link.active, .sidebar .nav-link:hover { background: #e0eafc; color: #0d6efd !important; }
-        .stat-card { background: linear-gradient(135deg, #f8fafc 0%, #e0eafc 100%); border-radius: 16px; }
-        .stat-label { font-size: 0.95rem; color: #888; }
-        .stat-value { font-size: 1.25rem; }
-        .boxplot-svg svg { width: 100%; height: 350px; }
-        .card-header { font-size: 1.1rem; }
-        .bg-success-subtle { background: #e6f4ea !important; }
-        .bg-warning-subtle { background: #fffbe6 !important; }
+        :root {
+            --primary-color: #2563eb;
+            --text-primary: #1a1f36;
+            --text-secondary: #4b5563;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+        }
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        .sidebar {
+            border-right: 1px solid var(--border-color);
+            background: var(--bg-card);
+        }
+        .sidebar .nav-link {
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            transition: background 0.2s, color 0.2s;
+        }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover {
+            background: #e5e7eb;
+            color: var(--primary-color) !important;
+        }
+        .sidebar .nav-link.text-danger {
+            color: #dc3545 !important;
+        }
+        .sidebar .nav-link.text-danger:hover {
+            background: #f8d7da;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+        }
+        main {
+            background: var(--bg-card);
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+        }
         @media (max-width: 768px) {
             .sidebar { display: none; }
             main { margin-left: 0 !important; }

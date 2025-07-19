@@ -1,45 +1,113 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>Boxplot sản phẩm Tiki</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Boxplot các thuộc tính số</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --text-primary: #1a1f36;
+            --text-secondary: #4b5563;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+        }
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        .container { max-width: 1100px; }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+        }
+        .boxplot-card {
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+            margin-bottom: 1.5rem;
+        }
+        .boxplot-card .card-header {
+            border-bottom: 1px solid #e5e7eb;
+            background: #fff;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .boxplot-svg {
+            background: #f8fafc;
+            border-radius: 0 0 10px 10px;
+            min-height: 340px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 0.5rem;
+        }
+        .boxplot-svg svg {
+            width: 100%;
+            height: 320px;
+            max-width: 100%;
+        }
+        .boxplot-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: #f9fafb;
+            border-radius: 6px;
+            padding: 0.5em 0.75em;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+            box-shadow: 0 1px 2px rgba(16,24,40,0.06);
+        }
+        @media (max-width: 768px) {
+            .container { padding: 1rem !important; }
+            .boxplot-card .card-header { font-size: 0.95rem; }
+            .boxplot-svg svg { height: 200px; }
+        }
+    </style>
 </head>
-<body class="bg-light" style="background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); min-height: 100vh;">
+<body>
     <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="card shadow-lg border-0 mb-4">
-                    <div class="card-body">
-                        <h2 class="fw-bold text-primary mb-3"><i class="fa-solid fa-chart-box"></i> Boxplot các thuộc tính số</h2>
-                        <span class="badge bg-info text-dark me-2">File: {{ filename }}</span>
-                        <span class="badge bg-warning text-dark">Số dòng: {{ nrows }}</span>
-                        <div class="row mt-4">
-                            {% for col in columns %}
-                            <div class="col-md-6 mb-4">
-                                <div class="card border-0 shadow-sm">
-                                    <div class="card-header bg-success-subtle text-success fw-bold">{{ col }}</div>
-                                    <div class="card-body">
-                                        <div class="boxplot-svg">{{ boxplots[col]|safe }}</div>
-                                    </div>
-                                </div>
+        <div class="card shadow-lg border-0 mb-4">
+            <div class="card-body">
+                <h2 class="fw-bold text-primary mb-3"><i class="fa-solid fa-chart-box"></i> Boxplot các thuộc tính số</h2>
+                <span class="badge bg-info text-dark me-2">File: {{ filename }}</span>
+                <span class="badge bg-warning text-dark">Số dòng: {{ nrows }}</span>
+                <div class="row mt-4 g-4">
+                    {% set sorted_cols = columns|reject('equalto', 'quantity_sold')|list + ['quantity_sold'] %}
+                    {% for col in sorted_cols %}
+                    <div class="col-12 col-md-6">
+                        <div class="card boxplot-card h-100">
+                            <div class="card-header">
+                                <i class="fa-solid fa-chart-box"></i>
+                                <span>{{ col }}</span>
                             </div>
-                            {% endfor %}
-                        </div>
-                        <div class="text-center mt-4">
-                            <a href="/stats" class="btn btn-primary px-4"><i class="fa-solid fa-table"></i> Xem thống kê mô tả</a>
-                            <a href="/dashboard" class="btn btn-secondary px-4 ms-2"><i class="fa-solid fa-arrow-left"></i> Về Dashboard</a>
+                            <div class="card-body boxplot-svg">
+                                {{ boxplots[col]|safe }}
+                                <div class="boxplot-title mt-3 text-center">Biểu đồ Boxplot cho <span class="text-dark">{{ col }}</span></div>
+                            </div>
                         </div>
                     </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-4">
+                    <a href="/stats" class="btn btn-primary px-4"><i class="fa-solid fa-table"></i> Xem thống kê mô tả</a>
+                    <a href="/dashboard" class="btn btn-secondary px-4 ms-2"><i class="fa-solid fa-arrow-left"></i> Về Dashboard</a>
                 </div>
             </div>
         </div>
     </div>
-    <style>
-        .boxplot-svg svg { width: 100%; height: 350px; }
-        .card-header { font-size: 1.1rem; }
-        .bg-success-subtle { background: #e6f4ea !important; }
-    </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
