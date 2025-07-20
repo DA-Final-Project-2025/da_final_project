@@ -55,3 +55,55 @@ def generate_boxplot_svgs(df, columns):
             plt.close(fig)
             svgs[col] = buf.getvalue().decode('utf-8')
     return svgs
+
+def generate_feature_distribution_svgs(df):
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import io
+
+    numeric_cols = df.select_dtypes(include='number').columns.tolist()
+    categorical_cols = df.select_dtypes(include='object').columns.tolist()
+    svgs = {}
+
+    # Numeric: Histogram
+    for col in numeric_cols:
+        fig, ax = plt.subplots(figsize=(4, 2.5))
+        ax.hist(df[col].dropna(), bins=30, color='#90caf9', edgecolor='black')
+        ax.set_title(f'Histogram: {col}', fontsize=11)
+        ax.set_xlabel(col)
+        ax.set_ylabel('Frequency')
+        fig.tight_layout()
+        buf = io.BytesIO()
+        fig.savefig(buf, format='svg')
+        plt.close(fig)
+        svgs[col] = buf.getvalue().decode('utf-8')
+
+    # Categorical: Pie (<=10) hoặc Bar (>10)
+    for col in categorical_cols:
+        value_counts = df[col].value_counts()
+        fig, ax = plt.subplots(figsize=(5, 3.5))  # tăng chiều ngang cho legend
+        vc = value_counts.copy()
+        if len(vc) > 5:
+            others = vc[5:].sum()
+            vc = vc[:5]
+            if others > 0:
+                vc['Khác'] = others
+        colors = sns.color_palette('pastel', len(vc))
+        wedges, texts, autotexts = ax.pie(
+            vc,
+            autopct=lambda pct: f'{pct:.1f}%' if pct > 5 else '',
+            startangle=90,
+            colors=colors,
+            textprops={'fontsize': 10}
+        )
+        ax.set_ylabel('')
+        ax.set_title(f'Pie chart: {col}', fontsize=11)
+        # Thêm legend bên phải
+        ax.legend(wedges, vc.index, title="Nhóm", loc="center left", bbox_to_anchor=(1, 0.5), fontsize=9)
+        fig.tight_layout()
+        buf = io.BytesIO()
+        fig.savefig(buf, format='svg', bbox_inches='tight')
+        plt.close(fig)
+        svgs[col] = buf.getvalue().decode('utf-8')
+
+    return svgs
