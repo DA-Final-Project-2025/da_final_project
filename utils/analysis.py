@@ -3,53 +3,55 @@ import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use('Agg')
 import seaborn as sns
-import os
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import accuracy_score
-import shap
+import io
 
-def generate_summary_stats(df):
-    return df.describe().to_html(classes='table table-bordered')
+def describe_numeric(df, columns):
+    stats = {}
+    for col in columns:
+        if col in df.columns:
+            stats[col] = {
+                'mean': df[col].mean(),
+                'median': df[col].median(),
+                'min': df[col].min(),
+                'max': df[col].max(),
+                'std': df[col].std(),
+                'count': df[col].count()
+            }
+    return stats
 
-def generate_plots(df):
-    plots = []
-    numeric_cols = df.select_dtypes(include='number').columns[:2]  # ví dụ lấy 2 cột đầu
-    for col in numeric_cols:
-        plt.figure()
-        sns.histplot(df[col], kde=True)
-        filename = f'static/{col}_plot.png'
-        plt.savefig(filename)
-        plt.close()
-        plots.append(filename)
-    return plots
-
-def train_and_predict(df):
-    df = df.dropna()
-    le = LabelEncoder()
-    if 'target' not in df.columns:
-        df['target'] = (df['price'] > df['price'].median()).astype(int)
-
-    X = df.drop(columns=['target', 'price'], errors='ignore')
-    X = X.select_dtypes(include=['number'])
-    y = df['target']
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-
-    model = RandomForestClassifier()
-    model.fit(X_train, y_train)
-    preds = model.predict(X_test)
-    acc = accuracy_score(y_test, preds)
-
-    explainer = shap.Explainer(model, X_test)
-    shap_values = explainer(X_test[:50])
-
-    # ✅ FIX: For binary classification
-    shap.plots.beeswarm(shap_values[..., 0], show=False)
-
-    shap_plot_path = "static/shap_plot.png"
-    plt.savefig(shap_plot_path)
-    plt.close()
-
-    return {"Random Forest": round(acc * 100, 2)}, shap_plot_path
+def generate_boxplot_svgs(df, columns):
+    # Định nghĩa đơn vị cho từng thuộc tính
+    units = {
+        "original_price": "VNĐ",
+        "price": "VNĐ",
+        "review_count": "lượt",
+        "rating_average": "sao",
+        "favourite_count": "lượt",
+        "number_of_images": "ảnh",
+        "vnd_cashback": "VNĐ",
+        "quantity_sold": "lượt"
+    }
+    svgs = {}
+    for col in columns:
+        if col in df.columns:
+            fig, ax = plt.subplots(figsize=(5, 7))
+            box = sns.boxplot(y=df[col], ax=ax, color='#e3f2fd', linewidth=2, fliersize=6)
+            max_val = df[col].max()
+            ax.scatter(0, max_val, color='red', s=120, label='Max', zorder=5)
+            unit = units.get(col, "")
+            ax.set_ylabel(f"{col} ({unit})", fontsize=14, color='#0d6efd')
+            ax.tick_params(axis='y', labelsize=12)
+            ax.grid(True, axis='y', linestyle='--', alpha=0.5)
+            # Annotation giá trị max
+            ax.annotate(f'Max: {max_val:,.2f}', xy=(0, max_val), xytext=(0.2, max_val),
+                        textcoords='data', color='red', fontsize=12, fontweight='bold',
+                        arrowprops=dict(arrowstyle='->', color='red', lw=2))
+            ax.legend()
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+            buf = io.BytesIO()
+            fig.tight_layout()
+            fig.savefig(buf, format='svg')
+            plt.close(fig)
+            svgs[col] = buf.getvalue().decode('utf-8')
+    return svgs

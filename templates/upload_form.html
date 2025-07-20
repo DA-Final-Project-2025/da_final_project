@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Dữ Liệu Sản Phẩm Tiki</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'tiki-primary': '#1a73e8',
+                        'tiki-secondary': '#34a853',
+                        'tiki-accent': '#ea4335',
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 2s infinite',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'spin-slow': 'spin 2s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-tiki-primary to-tiki-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chart-line text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-gray-800">Tiki Analytics</h1>
+                        <p class="text-xs text-gray-500">Data Upload Portal</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/dashboard" class="text-gray-600 hover:text-tiki-primary transition-colors">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                    </a>
+                    <div class="w-8 h-8 bg-gradient-to-r from-tiki-primary to-tiki-secondary rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-6 animate-pulse-slow">
+                <i class="fas fa-upload text-white text-2xl"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Upload Dữ Liệu Sản Phẩm</h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Tải lên file CSV chứa dữ liệu sản phẩm từ Tiki để bắt đầu phân tích và trực quan hóa dữ liệu
+            </p>
+        </div>
+
+        <!-- Upload Form Card -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden mb-8">
+            <div class="p-8">
+                <form id="uploadForm" action="/analyze" method="post" enctype="multipart/form-data" class="space-y-6">
+                    <!-- File Upload Area -->
+                    <div class="space-y-4">
+                        <label class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-file-csv text-green-600 mr-2"></i>
+                            Chọn File CSV
+                        </label>
+                        
+                        <!-- Drag & Drop Area -->
+                        <div id="dropArea" class="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-tiki-primary transition-all duration-300 cursor-pointer group">
+                            <input type="file" name="file" id="fileInput" accept=".csv" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            
+                            <div id="dropContent">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-50 transition-colors">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 group-hover:text-tiki-primary transition-colors"></i>
+                                </div>
+                                <p class="text-lg font-medium text-gray-700 mb-2">Kéo thả file CSV vào đây hoặc click để chọn</p>
+                                <p class="text-sm text-gray-500">Chấp nhận file .csv (tối đa 50MB)</p>
+                            </div>
+
+                            <!-- File Selected State -->
+                            <div id="fileSelected" class="hidden">
+                                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-check text-2xl text-green-600"></i>
+                                </div>
+                                <p class="text-lg font-medium text-green-700 mb-2">File đã được chọn</p>
+                                <p id="fileName" class="text-sm text-gray-600 font-mono bg-gray-50 px-3 py-1 rounded-lg inline-block"></p>
+                                <p id="fileSize" class="text-xs text-gray-500 mt-2"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Requirements -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-900 mb-2 flex items-center">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Yêu Cầu File CSV
+                        </h4>
+                        <ul class="text-sm text-blue-800 space-y-1">
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>File phải có định dạng .csv</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Chứa các cột: id, name, price, rating_average, review_count, brand...</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Dữ liệu phải được phân cách bằng dấu phẩy</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Dòng đầu tiên là header (tên cột)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-center pt-4">
+                        <button type="submit" id="submitBtn" disabled class="bg-gradient-to-r from-tiki-primary to-indigo-600 text-white font-semibold py-4 px-8 rounded-xl hover:from-blue-600 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                            <i class="fas fa-chart-bar mr-2"></i>
+                            Phân Tích Dữ Liệu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Expected Data Structure -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-table text-purple-600 mr-2"></i>
+                Cấu Trúc Dữ Liệu Mong Đợi
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left font-medium text-gray-700">Tên Cột</th>
+                            <th class="px-4 py-2 text-left font-medium text-gray-700">Kiểu Dữ Liệu</th>
+                            <th class="px-4 py-2 text-left font-medium text-gray-700">Mô Tả</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 font-mono text-blue-600">id</td>
+                            <td class="px-4 py-2 text-gray-600">Integer</td>
+                            <td class="px-4 py-2 text-gray-700">ID duy nhất của sản phẩm</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 font-mono text-blue-600">name</td>
+                            <td class="px-4 py-2 text-gray-600">String</td>
+                            <td class="px-4 py-2 text-gray-700">Tên sản phẩm</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 font-mono text-blue-600">price</td>
+                            <td class="px-4 py-2 text-gray-600">Float</td>
+                            <td class="px-4 py-2 text-gray-700">Giá bán hiện tại</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 font-mono text-blue-600">rating_average</td>
+                            <td class="px-4 py-2 text-gray-600">Float</td>
+                            <td class="px-4 py-2 text-gray-700">Điểm đánh giá trung bình</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 font-mono text-blue-600">review_count</td>
+                            <td class="px-4 py-2 text-gray-600">Integer</td>
+                            <td class="px-4 py-2 text-gray-700">Số lượng đánh giá</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 font-mono text-blue-600">brand</td>
+                            <td class="px-4 py-2 text-gray-600">String</td>
+                            <td class="px-4 py-2 text-gray-700">Thương hiệu sản phẩm</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-gray-500 mt-4">* Và các cột khác như trong dataset mẫu</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-download text-green-600 text-xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Tải Mẫu CSV</h3>
+                <p class="text-sm text-gray-600 mb-4">Download file CSV mẫu với cấu trúc chuẩn</p>
+                <button class="text-green-600 hover:text-green-700 font-medium text-sm">
+                    <i class="fas fa-download mr-1"></i>Tải xuống
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-question-circle text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Hướng Dẫn</h3>
+                <p class="text-sm text-gray-600 mb-4">Xem hướng dẫn chi tiết cách chuẩn bị dữ liệu</p>
+                <button class="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                    <i class="fas fa-external-link-alt mr-1"></i>Xem thêm
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-history text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Lịch Sử</h3>
+                <p class="text-sm text-gray-600 mb-4">Xem các file đã upload và phân tích trước đó</p>
+                <button class="text-purple-600 hover:text-purple-700 font-medium text-sm">
+                    <i class="fas fa-clock mr-1"></i>Xem lịch sử
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div class="mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-tiki-primary to-indigo-600 rounded-full mb-4">
+                    <i class="fas fa-cog text-white text-2xl animate-spin-slow"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Đang Phân Tích Dữ Liệu</h3>
+                <p class="text-gray-600">Vui lòng đợi trong giây lát...</p>
+            </div>
+            
+            <!-- Progress Steps -->
+            <div class="space-y-3">
+                <div class="flex items-center text-sm">
+                    <div id="step1" class="w-4 h-4 rounded-full bg-green-500 mr-3 flex items-center justify-center">
+                        <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                    <span class="text-green-600">Đọc file CSV</span>
+                </div>
+                <div class="flex items-center text-sm">
+                    <div id="step2" class="w-4 h-4 rounded-full bg-blue-500 mr-3 animate-pulse"></div>
+                    <span class="text-blue-600">Xử lý dữ liệu</span>
+                </div>
+                <div class="flex items-center text-sm">
+                    <div id="step3" class="w-4 h-4 rounded-full bg-gray-300 mr-3"></div>
+                    <span class="text-gray-500">Tạo biểu đồ</span>
+                </div>
+                <div class="flex items-center text-sm">
+                    <div id="step4" class="w-4 h-4 rounded-full bg-gray-300 mr-3"></div>
+                    <span class="text-gray-500">Hoàn thành</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mt-6">
+                <div class="bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-gradient-to-r from-tiki-primary to-indigo-600 h-2 rounded-full transition-all duration-500" style="width: 25%"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Đang xử lý... <span id="progressText">25%</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // File input and drag & drop functionality
+        const fileInput = document.getElementById('fileInput');
+        const dropArea = document.getElementById('dropArea');
+        const dropContent = document.getElementById('dropContent');
+        const fileSelected = document.getElementById('fileSelected');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const submitBtn = document.getElementById('submitBtn');
+        const uploadForm = document.getElementById('uploadForm');
+        const loadingModal = document.getElementById('loadingModal');
+
+        // Drag & Drop Events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('border-tiki-primary', 'bg-blue-50');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('border-tiki-primary', 'bg-blue-50');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            handleFileSelect();
+        }
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.name.toLowerCase().endsWith('.csv')) {
+                    alert('Vui lòng chọn file CSV!');
+                    fileInput.value = '';
+                    return;
+                }
+
+                // Validate file size (50MB)
+                if (file.size > 50 * 1024 * 1024) {
+                    alert('File quá lớn! Vui lòng chọn file nhỏ hơn 50MB.');
+                    fileInput.value = '';
+                    return;
+                }
+
+                // Show selected file info
+                dropContent.classList.add('hidden');
+                fileSelected.classList.remove('hidden');
+                fileName.textContent = file.name;
+                fileSize.textContent = `Kích thước: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                // Reset to initial state
+                dropContent.classList.remove('hidden');
+                fileSelected.classList.add('hidden');
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // Form submission with loading animation
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show loading modal
+            loadingModal.classList.remove('hidden');
+            
+            // Simulate progress steps
+            simulateProgress();
+            
+            // Submit form after delay
+            setTimeout(() => {
+                this.submit();
+            }, 3000);
+        });
+
+        function simulateProgress() {
+            const steps = [
+                { id: 'step1', progress: 25, text: '25%' },
+                { id: 'step2', progress: 50, text: '50%' },
+                { id: 'step3', progress: 75, text: '75%' },
+                { id: 'step4', progress: 100, text: '100%' }
+            ];
+
+            let currentStep = 0;
+
+            const interval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    const step = steps[currentStep];
+                    const stepElement = document.getElementById(step.id);
+                    
+                    // Update step appearance
+                    stepElement.classList.remove('bg-gray-300', 'animate-pulse');
+                    stepElement.classList.add('bg-green-500');
+                    stepElement.innerHTML = '<i class="fas fa-check text-white text-xs"></i>';
+                    
+                    // Update progress bar
+                    document.getElementById('progressBar').style.width = step.progress + '%';
+                    document.getElementById('progressText').textContent = step.text;
+                    
+                    // Update next step to loading
+                    if (currentStep + 1 < steps.length) {
+                        const nextStep = document.getElementById(steps[currentStep + 1].id);
+                        nextStep.classList.add('bg-blue-500', 'animate-pulse');
+                        nextStep.classList.remove('bg-gray-300');
+                    }
+                    
+                    currentStep++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 800);
+        }
+
+        // Reset file selection
+        function resetFileSelection() {
+            fileInput.value = '';
+            dropContent.classList.remove('hidden');
+            fileSelected.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        // Add click to change file
+        fileSelected.addEventListener('click', resetFileSelection);
+    </script>
+</body>
+</html>

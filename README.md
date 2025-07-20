@@ -14,7 +14,7 @@
 
 ## 🚀 Công nghệ sử dụng
 
-- Python 3.8+
+- Python 3.10
 - Flask – Web Framework
 - Pandas – Xử lý dữ liệu
 - Matplotlib & Seaborn – Trực quan hóa

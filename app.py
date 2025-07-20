@@ -1,61 +1,87 @@
-from flask import Flask, request, render_template, redirect, url_for
+
+from flask import Flask, request, render_template, redirect, url_for, flash
 import os
 import time
 import pandas as pd
-from utils.analysis import generate_summary_stats, generate_plots, train_and_predict
+from utils.analysis import describe_numeric, generate_boxplot_svgs
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_key'
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+NUMERIC_COLS = [
+    "original_price", "price", "review_count", "rating_average",
+    "favourite_count", "number_of_images", "vnd_cashback", "quantity_sold"
+]
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+# Trang chủ: upload file
 @app.route('/')
 def index():
     return render_template('index.html')
 
+
+# Xử lý upload và phân tích, chuyển về dashboard
 @app.route('/analyze', methods=['POST'])
 def analyze():
     if 'file' not in request.files:
-        return "Không có file được tải lên"
-
+        flash('Không tìm thấy file!')
+        return redirect(url_for('index'))
     file = request.files['file']
     if file.filename == '':
-        return "Chưa chọn file"
-
-    if not os.path.exists(UPLOAD_FOLDER):
-        os.makedirs(UPLOAD_FOLDER)
-
+        flash('Chưa chọn file!')
+        return redirect(url_for('index'))
     filename = f"{int(time.time())}_{file.filename}"
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
+    try:
+        df = pd.read_csv(filepath)
+    except Exception as e:
+        flash(f'Lỗi đọc file: {e}')
+        return redirect(url_for('index'))
+    # Lưu tên file mới nhất vào session nếu muốn
+    return redirect(url_for('dashboard'))
 
+# Thống kê mô tả
+@app.route('/stats')
+def stats():
+    import glob
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        flash('Chưa có file dữ liệu, vui lòng upload trước!')
+        return redirect(url_for('index'))
+    filepath = max(files, key=os.path.getctime)
     df = pd.read_csv(filepath)
+    nrows = len(df)
+    stats_data = describe_numeric(df, NUMERIC_COLS)
+    return render_template('stats.html', filename=os.path.basename(filepath), nrows=nrows, stats=stats_data, columns=NUMERIC_COLS)
 
-    if 'price' not in df.columns or 'brand' not in df.columns:
-        return "File thiếu cột 'price' hoặc 'brand'", 400
+# Boxplot
+@app.route('/boxplot')
+def boxplot():
+    import glob
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        flash('Chưa có file dữ liệu, vui lòng upload trước!')
+        return redirect(url_for('index'))
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    nrows = len(df)
+    boxplots = generate_boxplot_svgs(df, NUMERIC_COLS)
+    return render_template('boxplot.html', filename=os.path.basename(filepath), nrows=nrows, boxplots=boxplots, columns=NUMERIC_COLS)
 
-    price_range = request.form.get('price_range')
-    if price_range == "low":
-        df = df[df['price'] < 500000]
-    elif price_range == "mid":
-        df = df[(df['price'] >= 500000) & (df['price'] <= 2000000)]
-    elif price_range == "high":
-        df = df[df['price'] > 2000000]
+# Dashboard (nếu cần)
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
 
-    brand = request.form.get('brand')
-    if brand:
-        df = df[df['brand'].str.contains(brand, case=False, na=False)]
-
-    summary = generate_summary_stats(df)
-    plots = generate_plots(df)
-    accuracy_dict, shap_plot = train_and_predict(df)
-
-    return render_template(
-        'result.html',
-        summary=summary,
-        plots=plots,
-        accuracy=accuracy_dict,
-        shap_plot='shap_plot.png'
-    )
+# Dataset info
+@app.route('/dataset_info')
+def dataset_info():
+    return render_template('dataset_info.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

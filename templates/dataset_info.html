@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô tả Dataset Sản phẩm Tiki</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'tiki-primary': '#1976D2',
+                        'tiki-secondary': '#42A5F5',
+                        'dataset-green': '#10B981',
+                        'dataset-purple': '#8B5CF6',
+                        'dataset-orange': '#F59E0B',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out',
+                        'fade-in-down': 'fadeInDown 0.8s ease-out',
+                        'slide-in-left': 'slideInLeft 0.5s ease-out',
+                        'slide-in-right': 'slideInRight 0.5s ease-out',
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .data-type-badge {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .data-type-badge:hover {
+            transform: scale(1.05);
+        }
+        .row-hover {
+            transition: all 0.3s ease;
+        }
+        .row-hover:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="font-inter bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 py-16">
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-10 left-10 w-20 h-20 bg-white rounded-full animate-float"></div>
+            <div class="absolute top-32 right-16 w-16 h-16 bg-yellow-300 rounded-full animate-float" style="animation-delay: 1s;"></div>
+            <div class="absolute bottom-20 left-1/4 w-12 h-12 bg-pink-300 rounded-full animate-float" style="animation-delay: 2s;"></div>
+            <div class="absolute bottom-32 right-1/3 w-14 h-14 bg-green-300 rounded-full animate-float" style="animation-delay: 0.5s;"></div>
+        </div>
+        
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="animate-fade-in-down">
+                <div class="inline-block p-4 bg-white/20 backdrop-blur rounded-full mb-6 animate-pulse-glow">
+                    <i class="fas fa-database text-4xl text-white animate-float"></i>
+                </div>
+                <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-4 leading-tight">
+                    Dataset Tiki
+                </h1>
+                <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    Khám phá cấu trúc dữ liệu chi tiết của hệ thống sản phẩm Tiki
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <div class="glass-morphism rounded-2xl px-6 py-3">
+                        <span class="text-white font-semibold text-lg">18 Columns</span>
+                        <p class="text-blue-100 text-sm">Thuộc tính</p>
+                    </div>
+                    <div class="glass-morphism rounded-2xl px-6 py-3">
+                        <span class="text-white font-semibold text-lg">125k+ Records</span>
+                        <p class="text-blue-100 text-sm">Sản phẩm</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
+        <!-- Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate-fade-in-up">
+            <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-shadow duration-300">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-info-circle text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 ml-4">Thông tin cơ bản</h3>
+                </div>
+                <p class="text-gray-600">ID sản phẩm, tên, mô tả và thông tin định danh</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-shadow duration-300">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-dollar-sign text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 ml-4">Thông tin giá</h3>
+                </div>
+                <p class="text-gray-600">Giá gốc, giá bán, hoàn tiền và hỗ trợ trả góp</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-shadow duration-300">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-star text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 ml-4">Tương tác</h3>
+                </div>
+                <p class="text-gray-600">Đánh giá, yêu thích và lượt bán</p>
+            </div>
+        </div>
+
+        <!-- Dataset Schema Table -->
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden mb-12 animate-fade-in-up border border-gray-100">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-3xl font-bold gradient-text mb-2">Schema Dataset</h2>
+                        <p class="text-gray-600 text-lg">Chi tiết về cấu trúc và kiểu dữ liệu của từng thuộc tính</p>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="flex items-center space-x-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-gray-800">18</div>
+                                <div class="text-sm text-gray-500">Columns</div>
+                            </div>
+                            <div class="w-px h-12 bg-gray-300"></div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-gray-800">6</div>
+                                <div class="text-sm text-gray-500">Data Types</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full" id="datasetTable">
+                    <thead class="bg-gradient-to-r from-indigo-50 to-purple-50">
+                        <tr>
+                            <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200">
+                                <i class="fas fa-columns mr-2 text-indigo-600"></i>Tên cột
+                            </th>
+                            <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200">
+                                <i class="fas fa-file-alt mr-2 text-green-600"></i>Mô tả
+                            </th>
+                            <th class="px-8 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200">
+                                <i class="fas fa-code mr-2 text-purple-600"></i>Kiểu dữ liệu
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100" id="tableBody">
+                        <!-- Table content will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Action Section -->
+        <div class="text-center mb-16 animate-fade-in-up">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100 max-w-2xl mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Khám phá thêm</h3>
+                <p class="text-gray-600 mb-8">Sẵn sàng phân tích dữ liệu? Hãy quay về trang chủ để bắt đầu!</p>
+                
+                <button class="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <i class="fas fa-home mr-3 relative z-10"></i>
+                    <span class="relative z-10">Về trang chủ</span>
+                    <i class="fas fa-arrow-right ml-3 relative z-10 group-hover:translate-x-1 transition-transform duration-300"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const datasetSchema = [
+            { column: 'id', description: 'Mã định danh duy nhất của sản phẩm', type: 'int', category: 'identifier' },
+            { column: 'name', description: 'Tên đầy đủ của sản phẩm', type: 'str', category: 'basic' },
+            { column: 'description', description: 'Mô tả chi tiết về sản phẩm', type: 'str', category: 'basic' },
+            { column: 'original_price', description: 'Giá niêm yết ban đầu (VNĐ)', type: 'float', category: 'price' },
+            { column: 'price', description: 'Giá bán thực tế hiện tại (VNĐ)', type: 'float', category: 'price' },
+            { column: 'fulfillment_type', description: 'Phương thức giao hàng (Tiki, Seller)', type: 'str', category: 'logistics' },
+            { column: 'brand', description: 'Thương hiệu của sản phẩm', type: 'str', category: 'basic' },
+            { column: 'review_count', description: 'Tổng số lượt đánh giá từ khách hàng', type: 'int', category: 'engagement' },
+            { column: 'rating_average', description: 'Điểm đánh giá trung bình (1-5 sao)', type: 'float', category: 'engagement' },
+            { column: 'favourite_count', description: 'Số lượt người dùng yêu thích', type: 'int', category: 'engagement' },
+            { column: 'pay_later', description: 'Hỗ trợ thanh toán trả góp', type: 'bool', category: 'payment' },
+            { column: 'current_seller', description: 'Nhà bán hàng hiện tại', type: 'str', category: 'seller' },
+            { column: 'date_created', description: 'Ngày sản phẩm được tạo trên hệ thống', type: 'date', category: 'metadata' },
+            { column: 'number_of_images', description: 'Số lượng hình ảnh của sản phẩm', type: 'int', category: 'media' },
+            { column: 'vnd_cashback', description: 'Số tiền hoàn lại cho khách hàng (VNĐ)', type: 'float', category: 'price' },
+            { column: 'has_video', description: 'Sản phẩm có video giới thiệu không', type: 'bool', category: 'media' },
+            { column: 'category', description: 'Danh mục sản phẩm thuộc về', type: 'str', category: 'classification' },
+            { column: 'quantity_sold', description: 'Số lượng sản phẩm đã bán được', type: 'int', category: 'sales' }
+        ];
+
+        function getTypeColor(type) {
+            const colors = {
+                'int': 'bg-blue-100 text-blue-800 border-blue-200',
+                'str': 'bg-green-100 text-green-800 border-green-200',
+                'float': 'bg-purple-100 text-purple-800 border-purple-200',
+                'bool': 'bg-orange-100 text-orange-800 border-orange-200',
+                'date': 'bg-pink-100 text-pink-800 border-pink-200'
+            };
+            return colors[type] || 'bg-gray-100 text-gray-800 border-gray-200';
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                'identifier': 'fas fa-hashtag',
+                'basic': 'fas fa-info-circle',
+                'price': 'fas fa-dollar-sign',
+                'logistics': 'fas fa-truck',
+                'engagement': 'fas fa-heart',
+                'payment': 'fas fa-credit-card',
+                'seller': 'fas fa-store',
+                'metadata': 'fas fa-clock',
+                'media': 'fas fa-image',
+                'classification': 'fas fa-tags',
+                'sales': 'fas fa-chart-line'
+            };
+            return icons[category] || 'fas fa-circle';
+        }
+
+        function populateTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            datasetSchema.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = 'row-hover';
+                row.style.animationDelay = `${index * 0.05}s`;
+                row.classList.add('animate-slide-in-left');
+
+                row.innerHTML = `
+                    <td class="px-8 py-6">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center mr-4">
+                                <i class="${getCategoryIcon(item.category)} text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-lg font-bold text-gray-900 font-mono">${item.column}</div>
+                                <div class="text-sm text-gray-500 capitalize">${item.category.replace('_', ' ')}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-6">
+                        <p class="text-gray-700 leading-relaxed">${item.description}</p>
+                    </td>
+                    <td class="px-8 py-6 text-center">
+                        <span class="data-type-badge inline-flex items-center px-4 py-2 rounded-full text-sm font-bold border-2 ${getTypeColor(item.type)}">
+                            <i class="fas fa-code mr-2"></i>
+                            ${item.type}
+                        </span>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            populateTable();
+            
+            // Add staggered animation to rows
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach((row, index) => {
+                setTimeout(() => {
+                    row.classList.add('animate-slide-in-left');
+                }, index * 50);
+            });
+        });
+    </script>
+</body>
+</html>
