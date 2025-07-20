@@ -88,6 +88,11 @@
             <!-- Advanced Analytics -->
             <div class="mb-6">
                 <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">PHÂN TÍCH</h3>
+                <a href="/feature_types" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-cyan-50 hover:text-cyan-600 transition-all duration-200 {% if request.path == '/feature_types' %}bg-cyan-50 text-cyan-600 border-r-2 border-cyan-600{% else %}text-gray-600{% endif %}">
+                    <i class="fas fa-layer-group w-5 h-5 mr-3"></i>
+                    <span>Phân tích loại thuộc tính</span>
+                    <span class="ml-auto bg-cyan-100 text-cyan-600 text-xs px-2 py-1 rounded-full">Feature</span>
+                </a>
                 <div class="space-y-1">
                     <a href="/correlation" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-pink-50 hover:text-pink-600 transition-all duration-200 text-gray-600">
                         <i class="fas fa-project-diagram w-5 h-5 mr-3"></i>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>Phân tích loại thuộc tính</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased p-8 min-h-screen">
+    <a href="{{ url_for('dashboard') }}" class="inline-block mb-6 px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition duration-300">
+        &#8592; Quay lại Dashboard
+    </a>
+    
+    <h2 class="text-2xl font-bold text-blue-600 mb-6">
+        Phân tích loại thuộc tính cho file: <span class="text-blue-700">{{ filename }}</span>
+    </h2>
+    
+    <div class="flex flex-col md:flex-row gap-8 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-md flex-1">
+            <div class="text-lg font-semibold text-gray-800 mb-2">
+                Số lượng thuộc tính số (numeric): {{ num_numeric }}
+            </div>
+            <ul class="list-disc pl-5 space-y-1">
+                {% for col in numeric_cols %}
+                    <li>{{ col }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md flex-1">
+            <div class="text-lg font-semibold text-gray-800 mb-2">
+                Số lượng thuộc tính phân loại (categorical): {{ num_categorical }}
+            </div>
+            <ul class="list-disc pl-5 space-y-1">
+                {% for col in categorical_cols %}
+                    <li>{{ col }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    
+    <hr class="border-gray-300 my-8">
+    
+    <h3 class="text-xl font-bold text-blue-700 mb-4">Trực quan hóa phân phối thuộc tính</h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for col in numeric_cols + categorical_cols %}
+            {% if col != 'description' and col != 'name' %}
+                <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    <h4 class="text-base font-medium text-blue-700 mb-2">{{ col }}</h4>
+                    {{ feature_svgs[col]|safe }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</body>
+</html>
