@@ -3,6 +3,8 @@ import os
 import time
 import pandas as pd
 from utils.analysis import describe_numeric, generate_boxplot_svgs, generate_feature_distribution_svgs
+from utils.async_get_explainable import async_get_explainable
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 UPLOAD_FOLDER = 'uploads'
@@ -37,6 +39,7 @@ def analyze():
     file.save(filepath)
     try:
         df = pd.read_csv(filepath)
+        async_get_explainable(app)
     except Exception as e:
         flash(f'Lỗi đọc file: {e}')
         return redirect(url_for('index'))
@@ -102,6 +105,11 @@ def feature_types():
         categorical_cols=categorical_cols,
         feature_svgs=feature_svgs
     )
+
+
+@app.route('/explainable')
+def explainable():
+    return render_template('explainable/index.html')
 
 # Dashboard (nếu cần)
 @app.route('/dashboard')

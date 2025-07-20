@@ -58,3 +58,7 @@ pytest_cache/
 
 /static/*
 !/static/.gitkeep
+
+./.venv
+./.venv1
+.idea
