@@ -3,6 +3,7 @@ import os
 import time
 import pandas as pd
 from utils.analysis import describe_numeric, generate_boxplot_svgs, generate_feature_distribution_svgs
+from utils.correlation import generate_correlation_plots
 from utils.async_get_explainable import async_get_explainable
 
 app = Flask(__name__)
@@ -120,6 +121,65 @@ def dashboard():
 @app.route('/dataset_info')
 def dataset_info():
     return render_template('dataset_info.html')
+
+# Route cho giao diện correlation plots
+@app.route('/correlation')
+def correlation():
+    import glob
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        flash('Chưa có file dữ liệu, vui lòng upload trước!')
+        return redirect(url_for('index'))
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    numeric_cols = [
+        "original_price", "price", "review_count", "rating_average",
+        "favourite_count", "number_of_images", "vnd_cashback", "quantity_sold"
+    ]
+    categorical_cols = [
+        "name", "fulfillment_type", "brand", "pay_later", "current_seller",
+        "has_video", "category"
+    ]
+    # Lấy giá trị cột từ từng dropdown
+    scatter_x = request.args.get('scatter_x', numeric_cols[0] if numeric_cols else None)
+    scatter_y = request.args.get('scatter_y', numeric_cols[1] if len(numeric_cols) > 1 else numeric_cols[0] if numeric_cols else None)
+    density_x = request.args.get('density_x', numeric_cols[0] if numeric_cols else None)
+    density_y = request.args.get('density_y', numeric_cols[1] if len(numeric_cols) > 1 else numeric_cols[0] if numeric_cols else None)
+    violin_cat = request.args.get('violin_cat', categorical_cols[0] if categorical_cols else None)
+    violin_val = request.args.get('violin_val', numeric_cols[0] if numeric_cols else None)
+    plot_dir = 'static/correlation'
+    print("done picks columns")
+
+    scatter_path, density_2d_path, density_1d_path, violin_path = generate_correlation_plots(
+        df,
+        plot_dir,
+        x_col=scatter_x,
+        y_col=scatter_y,
+        density_x=density_x,
+        density_y=density_y,
+        cat_col=violin_cat,
+        violin_val=violin_val
+    )
+    print("done correlation plots")
+
+    nrows = len(df)
+    return render_template(
+        'correlation.html',
+        filename=os.path.basename(filepath),
+        nrows=nrows,
+        scatter_plot_url='/' + scatter_path,
+        density_2d_plot_url='/' + density_2d_path,
+        density_1d_plot_url='/' + density_1d_path if density_1d_path else None,
+        violin_plot_url='/' + violin_path,
+        numeric_cols=numeric_cols,
+        categorical_cols=categorical_cols,
+        scatter_x=scatter_x,
+        scatter_y=scatter_y,
+        density_x=density_x,
+        density_y=density_y,
+        violin_cat=violin_cat,
+        violin_val=violin_val
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)

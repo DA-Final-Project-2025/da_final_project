@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tương Quan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .animate-slide-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .glass-morphism {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .custom-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .section-divider {
+            background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+            height: 1px;
+        }
+    </style>
+</head>
+
+<body class="bg-white min-h-screen">
+    <!-- Background Pattern -->
+    <div class="fixed inset-0 opacity-5 pointer-events-none">
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, #667eea 1px, transparent 0); background-size: 20px 20px;"></div>
+    </div>
+    
+    <div class="relative max-w-7xl mx-auto py-12 px-4 lg:px-8">
+        <!-- Header Section -->
+        <div class="text-center mb-16 animate-fade-in">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl mb-8 shadow-2xl animate-float">
+                <i class="fa-solid fa-project-diagram text-4xl text-white"></i>
+            </div>
+            <h1 class="text-5xl font-black gradient-text mb-6 tracking-tight">
+                Phân tích Tương Quan
+            </h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Khám phá xu hướng, mối quan hệ và phân phối giữa các thuộc tính số/categorical trong dữ liệu
+            </p>
+            <div class="section-divider mt-8 max-w-xs mx-auto"></div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="flex flex-wrap justify-center gap-4 mb-12 animate-slide-up">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl px-6 py-4 border border-white/20">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-file-csv text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">Tập tin</p>
+                        <p class="text-lg font-bold text-gray-800">{{ filename }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl px-6 py-4 border border-white/20">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-database text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">Số dòng dữ liệu</p>
+                        <p class="text-lg font-bold text-gray-800">{{ nrows }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="glass-morphism rounded-3xl shadow-2xl p-10 animate-slide-up">
+            <!-- Tabs Navigation -->
+            <div class="mb-10">
+                <div class="flex justify-center">
+                    <nav class="flex space-x-2 bg-gray-100 p-1 rounded-2xl" id="plotTabs">
+                        <button class="py-3 px-6 bg-white text-indigo-600 rounded-xl font-bold shadow-sm focus:outline-none transition-all duration-300"
+                            id="scatter-tab" onclick="showTab('scatter')">
+                            <i class="fa-solid fa-chart-line mr-2"></i>Scatter Plot
+                        </button>
+                        <button class="py-3 px-6 text-gray-600 hover:text-indigo-600 rounded-xl font-bold focus:outline-none transition-all duration-300"
+                            id="density-tab" onclick="showTab('density')">
+                            <i class="fa-solid fa-chart-area mr-2"></i>Density Plot
+                        </button>
+                        <button class="py-3 px-6 text-gray-600 hover:text-indigo-600 rounded-xl font-bold focus:outline-none transition-all duration-300"
+                            id="violin-tab" onclick="showTab('violin')">
+                            <i class="fa-solid fa-chart-column mr-2"></i>Violin Plot
+                        </button>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Form Controls -->
+            <form method="get" class="mb-10">
+                <div class="bg-gray-50 rounded-2xl p-8 shadow-inner">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Tùy chỉnh Biểu đồ</h3>
+                    
+                    <!-- Scatter Plot Controls -->
+                    <div class="mb-8">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                            <i class="fa-solid fa-chart-line mr-2 text-indigo-500"></i>Scatter Plot
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Trục X</label>
+                                <select name="scatter_x" class="w-full border-0 rounded-xl px-4 py-3 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent custom-select font-medium">
+                                    {% for col in numeric_cols %}
+                                    <option value="{{ col }}" {% if col==scatter_x %}selected{% endif %}>{{ col }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Trục Y</label>
+                                <select name="scatter_y" class="w-full border-0 rounded-xl px-4 py-3 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent custom-select font-medium">
+                                    {% for col in numeric_cols %}
+                                    <option value="{{ col }}" {% if col==scatter_y %}selected{% endif %}>{{ col }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Density Plot Controls -->
+                    <div class="mb-8">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                            <i class="fa-solid fa-chart-area mr-2 text-purple-500"></i>Density Plot
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Trục X</label>
+                                <select name="density_x" class="w-full border-0 rounded-xl px-4 py-3 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent custom-select font-medium">
+                                    {% for col in numeric_cols %}
+                                    <option value="{{ col }}" {% if col==density_x %}selected{% endif %}>{{ col }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Trục Y</label>
+                                <select name="density_y" class="w-full border-0 rounded-xl px-4 py-3 bg-white shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent custom-select font-medium">
+                                    {% for col in numeric_cols %}
+                                    <option value="{{ col }}" {% if col==density_y %}selected{% endif %}>{{ col }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Violin Plot Controls -->
+                    <div class="mb-8">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                            <i class="fa-solid fa-chart-column mr-2 text-pink-500"></i>Violin Plot
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Danh mục</label>
+                                <select name="violin_cat" class="w-full border-0 rounded-xl px-4 py-3 bg-white shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent custom-select font-medium">
+                                    {% for col in categorical_cols %}
+                                    <option value="{{ col }}" {% if col==violin_cat %}selected{% endif %}>{{ col }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Giá trị</label>
+                                <select name="violin_val" class="w-full border-0 rounded-xl px-4 py-3 bg-white shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent custom-select font-medium">
+                                    {% for col in numeric_cols %}
+                                    <option value="{{ col }}" {% if col==violin_val %}selected{% endif %}>{{ col }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="group bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold px-10 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-3 mx-auto">
+                            <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                                <i class="fa-solid fa-chart-bar text-sm"></i>
+                            </div>
+                            <span class="text-lg">Vẽ lại biểu đồ</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Charts Display Area -->
+            <div class="bg-white rounded-2xl shadow-inner p-8 min-h-[500px]">
+                <div class="tab-content">
+                    <div id="scatter" class="tab-pane">
+                        {% if scatter_plot_url %}
+                        <div class="text-center">
+                            <img src="{{ scatter_plot_url }}" alt="Scatter Plot" class="mx-auto rounded-xl shadow-lg max-w-full">
+                        </div>
+                        {% else %}
+                        <div class="flex flex-col items-center justify-center h-96 text-gray-400">
+                            <i class="fa-solid fa-chart-line text-5xl mb-4"></i>
+                            <p class="text-xl font-medium">Scatter Plot sẽ hiển thị ở đây</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div id="density" class="tab-pane hidden">
+                        {% if density_2d_plot_url %}
+                        <div class="text-center mb-6">
+                            <img src="{{ density_2d_plot_url }}" alt="Density 2D Plot" class="mx-auto rounded-xl shadow-lg max-w-full">
+                        </div>
+                        {% endif %}
+                        {% if density_1d_plot_url %}
+                        <div class="text-center">
+                            <img src="{{ density_1d_plot_url }}" alt="Density 1D Plot" class="mx-auto rounded-xl shadow-lg max-w-full">
+                        </div>
+                        {% endif %}
+                        {% if not density_2d_plot_url and not density_1d_plot_url %}
+                        <div class="flex flex-col items-center justify-center h-96 text-gray-400">
+                            <i class="fa-solid fa-chart-area text-5xl mb-4"></i>
+                            <p class="text-xl font-medium">Density Plot sẽ hiển thị ở đây</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div id="violin" class="tab-pane hidden">
+                        {% if violin_plot_url %}
+                        <div class="text-center">
+                            <img src="{{ violin_plot_url }}" alt="Violin Plot" class="mx-auto rounded-xl shadow-lg max-w-full">
+                        </div>
+                        {% else %}
+                        <div class="flex flex-col items-center justify-center h-96 text-gray-400">
+                            <i class="fa-solid fa-chart-column text-5xl mb-4"></i>
+                            <p class="text-xl font-medium">Violin Plot sẽ hiển thị ở đây</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap justify-center gap-4 mt-12 pt-8 border-t border-gray-200">
+                <a href="/stats" class="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                        <i class="fa-solid fa-table text-lg"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="font-bold">Thống kê mô tả</div>
+                        <div class="text-xs opacity-90">Xem chi tiết số liệu</div>
+                    </div>
+                </a>
+                
+                <a href="/dashboard" class="group bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 font-bold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-3 border border-gray-200">
+                    <div class="w-10 h-10 bg-gray-100 group-hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-arrow-left text-lg"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="font-bold">Quay lại</div>
+                        <div class="text-xs opacity-75">Về Dashboard</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-16 animate-fade-in">
+            <div class="section-divider max-w-lg mx-auto mb-6"></div>
+            <p class="text-gray-500 text-sm font-medium flex items-center justify-center gap-2">
+                <i class="fa-solid fa-project-diagram"></i>
+                Khám phá xu hướng, mối quan hệ và phân phối giữa các thuộc tính số/categorical trong dữ liệu
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tab) {
+            // Hide all tabs
+            const tabs = ['scatter', 'density', 'violin'];
+            tabs.forEach(t => {
+                document.getElementById(t).classList.add('hidden');
+                const tabButton = document.getElementById(t + '-tab');
+                tabButton.classList.remove('bg-white', 'text-indigo-600', 'shadow-sm');
+                tabButton.classList.add('text-gray-600', 'hover:text-indigo-600');
+            });
+            
+            // Show selected tab
+            document.getElementById(tab).classList.remove('hidden');
+            const activeButton = document.getElementById(tab + '-tab');
+            activeButton.classList.add('bg-white', 'text-indigo-600', 'shadow-sm');
+            activeButton.classList.remove('text-gray-600', 'hover:text-indigo-600');
+        }
+        
+        // Show first tab on load
+        document.addEventListener('DOMContentLoaded', function() {
+            showTab('scatter');
+        });
+        
+        // Add smooth transitions to form elements
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.addEventListener('focus', function() {
+                this.parentElement.classList.add('transform', 'scale-105');
+            });
+            select.addEventListener('blur', function() {
+                this.parentElement.classList.remove('transform', 'scale-105');
+            });
+        });
+    </script>
+</body>
+
+</html>
