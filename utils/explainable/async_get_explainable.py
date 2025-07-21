@@ -23,10 +23,15 @@ def async_get_explainable(app):
         for key, b64_img in result.items():
             with open(f"static/{key}.png", "wb") as f:
                 f.write(base64.b64decode(b64_img))
-        get_shap(app)
 
-    thread = threading.Thread(target=get_explainable)
-    thread.start()
+    def execute_shap():
+        try:
+            get_shap(app)
+        except Exception as e:
+            print(f"SHAP error: {e}")
+
+    threading.Thread(target=get_explainable).start()
+    threading.Thread(target=execute_shap).start()
 
 
 def get_tree_based(app):

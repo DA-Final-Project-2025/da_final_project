@@ -96,36 +96,44 @@ def plot_waterfall(shap_values):
 
 # Load SHAP values & plots
 def plot_shap(feature):
-    base_dir = os.path.dirname(__file__)
-    static_dir = os.path.abspath(os.path.join(base_dir, '../../static'))
+    try:
+        base_dir = os.path.dirname(__file__)
+        static_dir = os.path.abspath(os.path.join(base_dir, '../../static'))
 
-    shap_path = os.path.join(static_dir, 'shap_values.pkl')
-    x_test_path = os.path.join(static_dir, 'X_test_shap.pkl')
+        shap_path = os.path.join(static_dir, 'shap_values.pkl')
+        x_test_path = os.path.join(static_dir, 'X_test_shap.pkl')
 
-    if not os.path.exists(shap_path) or not os.path.exists(x_test_path):
+        if not os.path.exists(shap_path) or not os.path.exists(x_test_path):
+            return {
+                'error': 'SHAP files not found'
+            }
+
+        shap_values = joblib.load(shap_path)
+        X_test = joblib.load(x_test_path)
+
         return {
-            'error': 'SHAP files not found'
+            'shap_summary_plot': plot_to_base64(lambda: plot_summary(shap_values, X_test)),
+            'shap_specific_feature': plot_to_base64(lambda: plot_specific_feature(feature, shap_values, X_test)),
+            'shap_waterfall_chart': plot_to_base64(lambda: plot_waterfall(shap_values))
         }
-
-    shap_values = joblib.load(shap_path)
-    X_test = joblib.load(x_test_path)
-
-    return {
-        'shap_summary_plot': plot_to_base64(lambda: plot_summary(shap_values, X_test)),
-        'shap_specific_feature': plot_to_base64(lambda: plot_specific_feature(feature, shap_values, X_test)),
-        'shap_waterfall_chart': plot_to_base64(lambda: plot_waterfall(shap_values))
-    }
+    except Exception as e:
+        print(f"[SHAP plotting error] {type(e).__name__}: {e}")
+        return {'error': f'SHAP plotting failed: {str(e)}'}
 
 def plot_shap_specific_feature(feature):
-    base_dir = os.path.dirname(__file__)
-    static_dir = os.path.abspath(os.path.join(base_dir, '../../static'))
+    try:
+        base_dir = os.path.dirname(__file__)
+        static_dir = os.path.abspath(os.path.join(base_dir, '../../static'))
 
-    shap_path = os.path.join(static_dir, 'shap_values.pkl')
-    x_test_path = os.path.join(static_dir, 'X_test_shap.pkl')
+        shap_path = os.path.join(static_dir, 'shap_values.pkl')
+        x_test_path = os.path.join(static_dir, 'X_test_shap.pkl')
 
-    if not os.path.exists(shap_path) or not os.path.exists(x_test_path):
+        if not os.path.exists(shap_path) or not os.path.exists(x_test_path):
+            return ''
+        shap_values = joblib.load(shap_path)
+        X_test = joblib.load(x_test_path)
+
+        return plot_to_base64(lambda: plot_specific_feature(feature, shap_values, X_test))
+    except Exception as e:
+        print(f"[SHAP plot_shap_specific_feature error] {type(e).__name__}: {e}")
         return ''
-    shap_values = joblib.load(shap_path)
-    X_test = joblib.load(x_test_path)
-
-    return plot_to_base64(lambda: plot_specific_feature(feature, shap_values, X_test))
