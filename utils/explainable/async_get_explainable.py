@@ -1,3 +1,5 @@
+from utils.explainable.shap import get_shap
+
 
 def async_get_explainable(app):
     import threading
@@ -16,12 +18,12 @@ def async_get_explainable(app):
 
         # 👇 Sinh ảnh mới
         tree_based = get_tree_based(app)
-        shap = get_shap(app)
         lime = get_lime(app)
-        result = {**tree_based, **shap, **lime}
+        result = {**tree_based, **lime}
         for key, b64_img in result.items():
             with open(f"static/{key}.png", "wb") as f:
                 f.write(base64.b64decode(b64_img))
+        get_shap(app)
 
     thread = threading.Thread(target=get_explainable)
     thread.start()
@@ -111,86 +113,9 @@ def get_tree_based(app):
 
     print("Done tree-based model")
     return {
-        'explainable': feature_chart,
+        'feature_chart': feature_chart,
         'model_performance': perf_chart,
         'tree_structure': tree_chart
-    }
-
-def get_shap(app):
-    import os, glob, io, base64
-    import pandas as pd
-    import shap
-    import matplotlib.pyplot as plt
-    from sklearn.model_selection import train_test_split
-    from sklearn.ensemble import RandomForestRegressor
-    from sklearn.preprocessing import LabelEncoder
-
-    print("Start handle SHAP")
-
-    # Load file CSV mới nhất
-    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
-    if not files:
-        return {'error': 'Không tìm thấy file dữ liệu'}
-
-    filepath = max(files, key=os.path.getctime)
-    df = pd.read_csv(filepath)
-
-    if 'quantity_sold' not in df.columns:
-        return {'error': "Thiếu cột 'quantity_sold' để làm nhãn"}
-
-    # Encode và chuẩn bị dữ liệu
-    categorical_features = ['brand', 'fulfillment_type', 'category']
-    for col in categorical_features:
-        df[col] = LabelEncoder().fit_transform(df[col].astype(str))
-    numeric_features = [
-        'original_price', 'price', 'review_count',
-        'rating_average', 'favourite_count',
-        'number_of_images', 'vnd_cashback',
-        'has_video'
-    ]
-    df = df.dropna(subset=numeric_features + ['quantity_sold'])
-
-    X = df[numeric_features + categorical_features]
-    y = df['quantity_sold']
-
-    # Train/test split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-
-    # Train model
-    model = RandomForestRegressor(n_estimators=100)
-    model.fit(X_train, y_train)
-
-    # SHAP explainer
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer(X_test)
-
-    def plot_to_base64(func_plot):
-        buf = io.BytesIO()
-        plt.tight_layout()
-        func_plot()
-        plt.savefig(buf, format="png", bbox_inches='tight')
-        plt.close()
-        buf.seek(0)
-        image_base64 = base64.b64encode(buf.read()).decode('utf-8')
-        return image_base64
-
-    # Summary plot
-    def plot_summary():
-        shap.summary_plot(shap_values, X_test, show=False)
-
-    # Feature importance plot
-    def plot_importance():
-        shap.plots.bar(shap_values, show=False)
-
-    # Waterfall plot for first instance
-    def plot_waterfall():
-        shap.plots.waterfall(shap_values[0])
-
-    print("Done SHAP")
-    return {
-        'shap_summary_plot': plot_to_base64(plot_summary),
-        'explainable': plot_to_base64(plot_importance),
-        'shap_waterfall_chart': plot_to_base64(plot_waterfall)
     }
 
 def get_lime(app):

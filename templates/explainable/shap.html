@@ -119,21 +119,33 @@
 
         <!-- SHAP Feature Importance -->
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center gap-3 mb-4">
-                <div
-                    class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                    <i class="fa-solid fa-brain text-white"></i>
+            <div class="flex items-center justify-between gap-3 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-brain text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">SHAP Feature</h3>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-xl font-bold text-gray-800">SHAP Feature Importance</h3>
-                    <p class="text-sm text-gray-500">Độ quan trọng theo SHAP</p>
+                <div class="flex gap-2">
+                    <select id="selected-feature"
+                        class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-pink-500">
+                        {% for feature in features %}
+                            <option>{{ feature }}</option>
+                        {% endfor %}
+                    </select>
+                    <button onclick="explainFeature()"
+                        class="bg-gradient-to-br from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-shadow">
+                        Explain
+                    </button>
                 </div>
             </div>
-            <div id="shap-feature-importance"
+            <div id="shap_specific_feature"
                 class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl flex items-center justify-center border border-purple-100 flex justify-center items-center">
-                <div id="shap-feature-importance-loading" class="flex items-center justify-center h-64 animate-pulse">
+                <div id="shap_specific_feature-loading" class="flex items-center justify-center h-64 animate-pulse">
                     <i class="fa-solid fa-spinner fa-spin text-purple-700 text-2xl"></i>
-                    <span class="ml-3 text-purple-700">Đang xử lý SHAP Feature Importance...</span>
+                    <span class="ml-3 text-purple-700">Đang xử lý SHAP Specific Feature...</span>
                 </div>
             </div>
         </div>
@@ -159,6 +171,19 @@
             </div>
         </div>
     </div>
+    <script>
+        async function explainFeature() {
+            const selectedFeature = document.getElementById("selected-feature").value;
+            const res = await fetch("/shap/specific/" + selectedFeature);
+            if (!res.ok) {
+                const errText = await res.text();
+                return;
+            }
+            const imageBase64 = await res.text();
+
+            document.getElementById('shap_specific_feature').innerHTML = `<img src="data:image/png;base64,${imageBase64}" class="rounded-xl shadow-md" />`;
+        }
+    </script>
 </body>
 
 </html>
