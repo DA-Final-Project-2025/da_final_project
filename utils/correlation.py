@@ -25,22 +25,43 @@ def generate_correlation_plots(
     df, plot_dir,
     x_col=None, y_col=None, 
     density_x=None, density_y=None, 
-    cat_col=None, violin_val=None
+    violin_cat=None, violin_val=None
+):
+    if not os.path.exists(plot_dir):
+        os.makedirs(plot_dir)
+    
+    scatter_path = generate_scatter_plot(
+        df, plot_dir,
+        x_col=x_col, y_col=y_col
+    )
+
+    (density_2d_path, density_1d_path) = generate_density_plot(
+        df, plot_dir,
+        density_x=density_x, density_y=density_y
+    )
+
+    violin_path = generate_violin_plot(
+        df, plot_dir,
+        violin_cat=violin_cat, violin_val=violin_val
+    )
+
+    return scatter_path, density_2d_path, density_1d_path, violin_path
+
+def generate_scatter_plot(
+    df, plot_dir,
+    x_col=None, y_col=None
 ):
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
     
     # Initialize paths for plots
     scatter_path = None
-    density_2d_path = None
-    density_1d_path = None
-    violin_path = None
 
     # Scatter plot
     if x_col is None:
-        x_col = 'price' if 'price' in df.columns else df.select_dtypes('number').columns[0]
+        x_col = df.select_dtypes('number').columns[0]
     if y_col is None:
-        y_col = 'rating_average' if 'rating_average' in df.columns else df.select_dtypes('number').columns[1]
+        y_col = df.select_dtypes('number').columns[1]
     scatter_path = os.path.join(plot_dir, 'scatter.svg')
     plt.figure(figsize=(10,4))
     sns.scatterplot(data=df, x=x_col, y=y_col)
@@ -54,12 +75,25 @@ def generate_correlation_plots(
     plt.savefig(scatter_path)
     plt.close()
     print("Scatter plot saved at:", scatter_path)
+    
+    return scatter_path
+
+def generate_density_plot(
+    df, plot_dir,
+    density_x=None, density_y=None
+):
+    if not os.path.exists(plot_dir):
+        os.makedirs(plot_dir)
+    
+    # Initialize paths for plots
+    density_2d_path = None
+    density_1d_path = None
 
     # Density plot: 
     if density_x is None:
-        density_x = x_col
+        density_x = df.select_dtypes('number').columns[0]
     if density_y is None:
-        density_y = y_col
+        density_y = df.select_dtypes('number').columns[1]
 
     unit_x = units.get(density_x, "")
     unit_y = units.get(density_y, "")
@@ -124,29 +158,40 @@ def generate_correlation_plots(
 
         print("Density 1D chồng nhau plot saved at:", density_1d_path)
 
+    return density_2d_path, density_1d_path
+
+def generate_violin_plot(
+    df, plot_dir,
+    violin_cat=None, violin_val=None
+):
+    if not os.path.exists(plot_dir):
+        os.makedirs(plot_dir)
+    
+    # Initialize paths for plots
+    violin_path = None
 
     # Violin plot: chỉ lấy top 10 nhóm lớn nhất, các nhóm còn lại gộp thành 'Others' (nếu số nhóm > 10)
-    if cat_col is None:
-        cat_col = 'category' if 'category' in df.columns else df.select_dtypes('object').columns[0]
+    if violin_cat is None:
+        violin_cat = 'category' if 'category' in df.columns else df.select_dtypes('object').columns[0]
     if violin_val is None:
-        violin_val = x_col
+        violin_val = df.select_dtypes('number').columns[0]
     violin_path = os.path.join(plot_dir, 'violin.svg')
 
     # Kiểm tra số nhóm thực tế
-    group_counts = df[cat_col].value_counts()
+    group_counts = df[violin_cat].value_counts()
     num_unique_groups = group_counts.shape[0]
 
     df_violin = df.copy()
 
     if num_unique_groups > 10:
         top_groups = group_counts.nlargest(10).index.tolist()
-        df_violin[cat_col] = df_violin[cat_col].apply(lambda x: x if x in top_groups else 'Others')
+        df_violin[violin_cat] = df_violin[violin_cat].apply(lambda x: x if x in top_groups else 'Others')
         x_order = top_groups + ['Others']
     else:
         x_order = group_counts.index.tolist()  # Giữ nguyên thứ tự nhóm thực tế
 
     plt.figure(figsize=(10, 5))
-    sns.violinplot(data=df_violin, x=cat_col, y=violin_val, order=x_order)
+    sns.violinplot(data=df_violin, x=violin_cat, y=violin_val, order=x_order)
 
     # Áp dụng custom nhãn trục X
     ax = plt.gca()
@@ -155,10 +200,10 @@ def generate_correlation_plots(
 
     unit_val = units.get(violin_val, "")
     title = (
-        f'Violin plot của {violin_val} ({unit_val}) theo {cat_col}'
+        f'Violin plot của {violin_val} ({unit_val}) theo {violin_cat}'
         + (f' (Top 10 nhóm, nhóm nhỏ gộp "Others")' if num_unique_groups > 10 else '')
         if unit_val else
-        f'Violin plot của {violin_val} theo {cat_col}'
+        f'Violin plot của {violin_val} theo {violin_cat}'
         + (f' (Top 10 nhóm, nhóm nhỏ gộp "Others")' if num_unique_groups > 10 else '')
     )
     plt.ylabel(f"{violin_val} ({unit_val})" if unit_val else violin_val)
@@ -169,4 +214,6 @@ def generate_correlation_plots(
     plt.close()
 
     print("Violin plot saved at:", violin_path)
-    return scatter_path, density_2d_path, density_1d_path, violin_path
+    
+    return violin_path
+    

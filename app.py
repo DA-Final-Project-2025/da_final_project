@@ -3,13 +3,9 @@ import os
 import time
 import pandas as pd
 from utils.analysis import describe_numeric, generate_boxplot_svgs, generate_feature_distribution_svgs
-<<<<<<< HEAD
-from utils.correlation import generate_correlation_plots
-from utils.async_get_explainable import async_get_explainable
-=======
+from utils.correlation import generate_correlation_plots, generate_scatter_plot, generate_density_plot, generate_violin_plot
 from utils.explainable.async_get_explainable import async_get_explainable
 from utils.explainable.shap import plot_shap, plot_shap_specific_feature
->>>>>>> master
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -150,6 +146,7 @@ def dashboard():
 def dataset_info():
     return render_template('dataset_info.html')
 
+
 # Route cho giao diện correlation plots
 @app.route('/correlation')
 def correlation():
@@ -169,15 +166,14 @@ def correlation():
         "has_video", "category"
     ]
     # Lấy giá trị cột từ từng dropdown
-    scatter_x = request.args.get('scatter_x', numeric_cols[0] if numeric_cols else None)
-    scatter_y = request.args.get('scatter_y', numeric_cols[1] if len(numeric_cols) > 1 else numeric_cols[0] if numeric_cols else None)
-    density_x = request.args.get('density_x', numeric_cols[0] if numeric_cols else None)
-    density_y = request.args.get('density_y', numeric_cols[1] if len(numeric_cols) > 1 else numeric_cols[0] if numeric_cols else None)
-    violin_cat = request.args.get('violin_cat', categorical_cols[0] if categorical_cols else None)
-    violin_val = request.args.get('violin_val', numeric_cols[0] if numeric_cols else None)
+    scatter_x = numeric_cols[0] if numeric_cols else None
+    scatter_y = numeric_cols[1] if len(numeric_cols) > 1 else (numeric_cols[0] if numeric_cols else None)
+    density_x = numeric_cols[0] if numeric_cols else None
+    density_y = numeric_cols[1] if len(numeric_cols) > 1 else (numeric_cols[0] if numeric_cols else None)
+    violin_cat = categorical_cols[0] if categorical_cols else None
+    violin_val = numeric_cols[0] if numeric_cols else None
+    
     plot_dir = 'static/correlation'
-    print("done picks columns")
-
     scatter_path, density_2d_path, density_1d_path, violin_path = generate_correlation_plots(
         df,
         plot_dir,
@@ -185,11 +181,9 @@ def correlation():
         y_col=scatter_y,
         density_x=density_x,
         density_y=density_y,
-        cat_col=violin_cat,
+        violin_cat=violin_cat,
         violin_val=violin_val
     )
-    print("done correlation plots")
-
     nrows = len(df)
     return render_template(
         'correlation.html',
@@ -208,6 +202,103 @@ def correlation():
         violin_cat=violin_cat,
         violin_val=violin_val
     )
+
+# AJAX endpoint để vẽ lại scatter plot
+@app.route('/correlation/scatter_plot', methods=['POST'])
+def scatter_plot_ajax():
+    import glob
+    from flask import jsonify
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        return jsonify({'error': 'No data file found'}), 400
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    numeric_cols = [
+        "original_price", "price", "review_count", "rating_average",
+        "favourite_count", "number_of_images", "vnd_cashback", "quantity_sold"
+    ]
+    
+    data = request.get_json()
+    scatter_x = data.get('scatter_x', numeric_cols[0] if numeric_cols else None)
+    scatter_y = data.get('scatter_y', numeric_cols[1] if len(numeric_cols) > 1 else (numeric_cols[0] if numeric_cols else None))
+    
+    plot_dir = 'static/correlation'
+    scatter_path = generate_scatter_plot(
+        df,
+        plot_dir,
+        x_col=scatter_x,
+        y_col=scatter_y
+    )
+    return jsonify({
+        'scatter_plot_url': '/' + scatter_path
+    })
+
+# AJAX endpoint để vẽ lại density plots
+@app.route('/correlation/density_plot', methods=['POST'])
+def density_plot_ajax():
+    import glob
+    from flask import jsonify
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        return jsonify({'error': 'No data file found'}), 400
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    numeric_cols = [
+        "original_price", "price", "review_count", "rating_average",
+        "favourite_count", "number_of_images", "vnd_cashback", "quantity_sold"
+    ]
+    
+    data = request.get_json()
+    density_x = data.get('density_x', numeric_cols[0] if numeric_cols else None)
+    density_y = data.get('density_y', numeric_cols[1] if len(numeric_cols) > 1 else (numeric_cols[0] if numeric_cols else None))
+    
+    plot_dir = 'static/correlation'
+    (density_2d_path, density_1d_path) = generate_density_plot(
+        df,
+        plot_dir,
+        density_x=density_x,
+        density_y=density_y
+    )
+    
+    return jsonify({
+        'density_2d_plot_url': '/' + density_2d_path,
+        'density_1d_plot_url': '/' + density_1d_path if density_1d_path else None,
+    })
+
+# AJAX endpoint để vẽ lại violin plots
+@app.route('/correlation/violin_plot', methods=['POST'])
+def violin_plot_ajax():
+    import glob
+    from flask import jsonify
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        return jsonify({'error': 'No data file found'}), 400
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    numeric_cols = [
+        "original_price", "price", "review_count", "rating_average",
+        "favourite_count", "number_of_images", "vnd_cashback", "quantity_sold"
+    ]
+    categorical_cols = [
+        "name", "fulfillment_type", "brand", "pay_later", "current_seller",
+        "has_video", "category"
+    ]
+    data = request.get_json()
+    violin_cat = data.get('violin_cat', categorical_cols[0] if categorical_cols else None)
+    violin_val = data.get('violin_val', numeric_cols[0] if numeric_cols else None)
+    
+    print(f"Violin category: {violin_cat}, Violin value: {violin_val}")
+    plot_dir = 'static/correlation'
+    violin_path = generate_violin_plot(
+        df,
+        plot_dir,
+        violin_cat=violin_cat,
+        violin_val=violin_val
+    )
+    
+    return jsonify({
+        'violin_plot_url': '/' + violin_path
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
