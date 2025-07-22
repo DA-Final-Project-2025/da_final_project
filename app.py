@@ -115,7 +115,30 @@ def feature_types():
 
 @app.route('/explainable')
 def explainable():
-    return render_template('explainable/index.html')
+    import glob
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        flash('Chưa có file dữ liệu, vui lòng upload trước!')
+        return redirect(url_for('index'))
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+
+    # Biến mục tiêu
+    target = 'quantity_sold'
+
+    # Loại các cột không có ý nghĩa dự đoán
+    drop_cols = ['Unnamed: 0', 'id', 'name', 'description', 'current_seller']
+
+    features = [col for col in df.columns if col not in drop_cols + [target]]
+    return render_template('explainable/index.html', features=features)
+
+@app.route('/shap/<feature>')
+def shap(feature):
+    return plot_shap(feature)
+
+@app.route('/shap/specific/<feature>')
+def shap_specific_feature(feature):
+    return plot_shap_specific_feature(feature)
 
 # Dashboard (nếu cần)
 @app.route('/dashboard')
