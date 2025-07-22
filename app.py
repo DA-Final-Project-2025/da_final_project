@@ -186,7 +186,7 @@ def correlation():
     )
     nrows = len(df)
     return render_template(
-        'correlation.html',
+        'correlation/correlation.html',
         filename=os.path.basename(filepath),
         nrows=nrows,
         scatter_plot_url='/' + scatter_path,
