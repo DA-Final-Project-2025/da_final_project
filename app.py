@@ -3,8 +3,13 @@ import os
 import time
 import pandas as pd
 from utils.analysis import describe_numeric, generate_boxplot_svgs, generate_feature_distribution_svgs
+<<<<<<< HEAD
 from utils.correlation import generate_correlation_plots
 from utils.async_get_explainable import async_get_explainable
+=======
+from utils.explainable.async_get_explainable import async_get_explainable
+from utils.explainable.shap import plot_shap, plot_shap_specific_feature
+>>>>>>> master
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'

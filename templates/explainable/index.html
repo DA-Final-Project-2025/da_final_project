@@ -55,10 +55,6 @@
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
-    <!-- Background Pattern -->
-    <div class="fixed inset-0 opacity-5">
-        <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.4"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-    </div>
 
     <!-- Header với gradient background -->
     <div class="gradient-bg py-8 px-4 sm:px-6 lg:px-8">
@@ -192,7 +188,7 @@
     <script>
         async function fetchTreeBasedModel() {
             const imgPaths = {
-                feature_importance: "/static/feature_importance.png",
+                feature_chart: "/static/feature_chart.png",
                 model_performance: "/static/model_performance.png",
                 tree_structure: "/static/tree_structure.png"
             };
@@ -206,12 +202,12 @@
                     return false;
                 }
             }
-            const hasFeatureImportance = await checkImage(imgPaths.feature_importance);
+            const hasFeatureChart = await checkImage(imgPaths.feature_chart);
             const hasModelPerformance = await checkImage(imgPaths.model_performance);
             const hasTreeStructure = await checkImage(imgPaths.tree_structure);
-            if (hasFeatureImportance) {
+            if (hasFeatureChart) {
                 document.getElementById('feature-chart').innerHTML =
-                    `<img src="${imgPaths.feature_importance}" class="rounded-xl shadow-md max-w-full h-auto" />`;
+                    `<img src="${imgPaths.feature_chart}" class="rounded-xl shadow-md max-w-full h-auto" />`;
             }
             if (hasModelPerformance) {
                 document.getElementById('model-perf-chart').innerHTML =
@@ -224,36 +220,15 @@
         }
 
         async function fetchShap() {
-            const imgPaths = {
-                summary: "/static/shap_summary_plot.png",
-                importance: "/static/feature_importance.png",
-                waterfall: "/static/shap_waterfall_chart.png"
-            };
-            async function checkImage(path) {
-                try {
-                    const res = await fetch(path, {
-                        method: "HEAD"
-                    });
-                    return res.ok;
-                } catch {
-                    return false;
-                }
+            const selectedFeature = document.getElementById("selected-feature").value;
+            const res = await fetch('/shap/' + selectedFeature);
+            const data = await res.json();
+            if (data.error) {
+                return;
             }
-            const hasSummary = await checkImage(imgPaths.summary);
-            const hasImportance = await checkImage(imgPaths.importance);
-            const hasWaterfall = await checkImage(imgPaths.waterfall);
-            if (hasSummary) {
-                document.getElementById('shap-summary-plot').innerHTML =
-                    `<img src="${imgPaths.summary}" class="rounded-xl shadow-md max-w-full h-auto" />`;
-            }
-            if (hasImportance) {
-                document.getElementById('shap-feature-importance').innerHTML =
-                    `<img src="${imgPaths.importance}" class="rounded-xl shadow-md max-w-full h-auto" />`;
-            }
-            if (hasWaterfall) {
-                document.getElementById('shap-waterfall-chart').innerHTML =
-                    `<img src="${imgPaths.waterfall}" class="rounded-xl shadow-md max-w-full h-auto" />`;
-            }
+            document.getElementById('shap-summary-plot').innerHTML = `<img src="data:image/png;base64,${data.shap_summary_plot}" class="rounded-xl shadow-md" />`;
+            document.getElementById('shap_specific_feature').innerHTML = `<img src="data:image/png;base64,${data.shap_specific_feature}" class="rounded-xl shadow-md" />`;
+            document.getElementById('shap-waterfall-chart').innerHTML = `<img src="data:image/png;base64,${data.shap_waterfall_chart}" class="rounded-xl shadow-md" />`;
         }
 
          async function fetchLime() {
