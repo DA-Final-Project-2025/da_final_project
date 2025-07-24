@@ -3,7 +3,8 @@ import os
 import time
 import pandas as pd
 from utils.analysis import describe_numeric, generate_boxplot_svgs, generate_feature_distribution_svgs
-from utils.correlation import generate_correlation_plots, generate_scatter_plot, generate_density_plot, generate_violin_plot
+from utils.correlation_auto import auto_generate_scatter_plot, auto_generate_anova_plot
+from utils.correlation_manual import generate_correlation_plots, generate_scatter_plot, generate_density_plot, generate_violin_plot
 from utils.explainable.async_get_explainable import async_get_explainable
 from utils.explainable.shap import plot_shap, plot_shap_specific_feature
 
@@ -298,6 +299,74 @@ def violin_plot_ajax():
     
     return jsonify({
         'violin_plot_url': '/' + violin_path
+    })
+
+# AJAX endpoint phân tích tương quan tự động sử ung phương pháp Pearson
+@app.route('/correlation/auto/pearson', methods=['GET'])
+def correlation_auto_pearson_ajax():
+    import glob
+    from flask import jsonify
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        return jsonify({'error': 'No data file found'}), 400
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    
+    plot_dir = 'static/correlation_auto/pearson'
+    pearson_maxtrix_path, pearson_scatter_paths, pearson_plot_count, = auto_generate_scatter_plot(
+        df,
+        plot_dir,
+        method='pearson',
+    )
+    return jsonify({
+        'pearson_matrix_url': '/' + pearson_maxtrix_path,
+        'pearson_scatter_paths': [f'/{path}' for path in pearson_scatter_paths],
+        'pearson_plot_count': pearson_plot_count
+    })
+
+# AJAX endpoint phân tích tương quan tự động sử ung phương pháp Spearman
+@app.route('/correlation/auto/spearman', methods=['GET'])
+def correlation_auto_spearman_ajax():
+    import glob
+    from flask import jsonify
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        return jsonify({'error': 'No data file found'}), 400
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    
+    plot_dir = 'static/correlation_auto/spearman'
+    spearman_maxtrix_path, spearman_scatter_paths, spearman_plot_count, = auto_generate_scatter_plot(
+        df,
+        plot_dir,
+        method='spearman',
+    )
+    return jsonify({
+        'spearman_matrix_url': '/' + spearman_maxtrix_path,
+        'spearman_scatter_paths': [f'/{path}' for path in spearman_scatter_paths],
+        'spearman_plot_count': spearman_plot_count
+    })
+
+# AJAX endpoint phân tích ANOVA tự động
+@app.route('/correlation/auto/anova', methods=['GET'])
+def correlation_auto_anova_ajax():
+    import glob
+    from flask import jsonify
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        return jsonify({'error': 'No data file found'}), 400
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    
+    plot_dir = 'static/correlation_auto/anova'
+    anova_paths, plot_count = auto_generate_anova_plot(
+        df,
+        plot_dir
+    )
+    
+    return jsonify({
+        'anova_paths': [f'/{path}' for path in anova_paths],
+        'plot_count': plot_count
     })
 
 if __name__ == '__main__':

@@ -161,75 +161,28 @@
             <!-- Tabs Navigation -->
             <div class="mb-10">
                 <div class="flex justify-center">
-                    <nav class="flex space-x-2 bg-gray-100 p-1 rounded-2xl" id="plotTabs">
+                    <nav class="flex space-x-2 bg-gray-100 p-1 rounded-2xl" id="mainTabs">
                         <button
                             class="py-3 px-6 bg-white text-indigo-600 rounded-xl font-bold shadow-sm focus:outline-none transition-all duration-300"
-                            id="scatter-tab" onclick="showTab('scatter')">
-                            <i class="fa-solid fa-chart-line mr-2"></i>Scatter Plot
+                            id="main-manual-tab" onclick="showMainTab('manual')">
+                            <i class="fa-solid fa-sliders mr-2"></i>Phân Tích Thủ Công
                         </button>
                         <button
                             class="py-3 px-6 text-gray-600 hover:text-indigo-600 rounded-xl font-bold focus:outline-none transition-all duration-300"
-                            id="density-tab" onclick="showTab('density')">
-                            <i class="fa-solid fa-chart-area mr-2"></i>Density Plot
-                        </button>
-                        <button
-                            class="py-3 px-6 text-gray-600 hover:text-indigo-600 rounded-xl font-bold focus:outline-none transition-all duration-300"
-                            id="violin-tab" onclick="showTab('violin')">
-                            <i class="fa-solid fa-chart-column mr-2"></i>Violin Plot
+                            id="main-auto-tab" onclick="showMainTab('auto')">
+                            <i class="fa-solid fa-robot mr-2"></i>Phân Tích Tự Động
                         </button>
                     </nav>
                 </div>
             </div>
 
-            <!-- Form Controls -->
-            <div id="scatter-form-section">
-                {% include 'correlation/correlation_scatter.html' %}
+            <!-- Manual Analysis Tab Content -->
+            <div id="manual-tab-content">
+                {% include 'correlation/correlation_manual.html' %}
             </div>
-            <div id="density-form-section" class="hidden">
-                {% include 'correlation/correlation_density.html' %}
-            </div>
-            <div id="violin-form-section" class="hidden">
-                {% include 'correlation/correlation_violin.html' %}
-            </div>
-
-            <!-- Charts Display Area -->
-            <div class="bg-white rounded-2xl shadow-inner p-8 min-h-[500px]">
-                <div class="tab-content">
-                    <div id="scatter" class="tab-pane">
-                        <div class="text-center">
-                            <img id="scatter-plot-img" src="{{ scatter_plot_url }}" alt="Scatter Plot"
-                                class="mx-auto rounded-xl max-w-full">
-                        </div>
-                    </div>
-                    <div id="density" class="tab-pane hidden">
-                        <div class="text-center mb-6">
-                            <img id="density-2d-plot-img" src="{{ density_2d_plot_url }}" alt="Density 2D Plot"
-                                class="mx-auto rounded-xl max-w-full">
-                        </div>
-                        <div class="text-center">
-                            <img id="density-1d-plot-img" src="{{ density_1d_plot_url }}" alt="Density 1D Plot"
-                                class="mx-auto rounded-xl max-w-full">
-                        </div>
-                    </div>
-                    <div id="violin" class="tab-pane hidden">
-                        <div class="text-center">
-                            <img id="violin-plot-img" src="{{ violin_plot_url }}" alt="Violin Plot"
-                                class="mx-auto rounded-xl max-w-full">
-                        </div>
-                    </div>
-                </div>
-                <div id="scatter-loading" class="hidden text-center py-8">
-                    <i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-500 mb-4"></i>
-                    <p class="text-lg text-gray-500">Đang vẽ lại biểu đồ...</p>
-                </div>
-                <div id="density-loading" class="hidden text-center py-8">
-                    <i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-500 mb-4"></i>
-                    <p class="text-lg text-gray-500">Đang vẽ lại biểu đồ...</p>
-                </div>
-                <div id="violin-loading" class="hidden text-center py-8">
-                    <i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-500 mb-4"></i>
-                    <p class="text-lg text-gray-500">Đang vẽ lại biểu đồ...</p>
-                </div>
+            <!-- Auto Analysis Tab Content -->
+            <div id="auto-tab-content" class="hidden">
+                {% include 'correlation/correlation_auto.html' %}
             </div>
 
             <!-- Action Buttons -->
@@ -271,33 +224,79 @@
     </div>
 
     <script>
+
+        // --- Main Tabs switching logic (Manual/Auto) ---
+        function showMainTab(tab) {
+            // Hide all tab contents
+            document.getElementById('manual-tab-content').classList.add('hidden');
+            document.getElementById('auto-tab-content').classList.add('hidden');
+            // Remove active style from all tab buttons
+            document.getElementById('main-manual-tab').classList.remove('bg-white', 'text-indigo-600', 'shadow-sm');
+            document.getElementById('main-manual-tab').classList.add('text-gray-600', 'hover:text-indigo-600');
+            document.getElementById('main-auto-tab').classList.remove('bg-white', 'text-indigo-600', 'shadow-sm');
+            document.getElementById('main-auto-tab').classList.add('text-gray-600', 'hover:text-indigo-600');
+            // Show selected tab content
+            document.getElementById(tab + '-tab-content').classList.remove('hidden');
+            // Set active style for selected tab button
+            document.getElementById('main-' + tab + '-tab').classList.add('bg-white', 'text-indigo-600', 'shadow-sm');
+            document.getElementById('main-' + tab + '-tab').classList.remove('text-gray-600', 'hover:text-indigo-600');
+            // If switching to manual, show last selected sub-tab or default to scatter
+            if (tab === 'manual') {
+                showTab(window.lastManualSubTab || 'scatter');
+            }
+        }
+
+        // --- Manual Analysis sub-tabs logic (Scatter/Density/Violin) ---
+        function showTab(tab) {
+            // Save last selected sub-tab
+            window.lastManualSubTab = tab;
+            const tabs = ['scatter', 'density', 'violin'];
+            tabs.forEach(t => {
+                document.getElementById(t).classList.add('hidden');
+                document.getElementById(t + '-form-section').classList.add('hidden');
+                const tabButton = document.getElementById(t + '-tab');
+                tabButton.classList.remove('bg-white', 'text-indigo-600', 'shadow-sm');
+                tabButton.classList.add('text-gray-600', 'hover:text-indigo-600');
+                showOrHideLoading(t, false);
+            });
+            document.getElementById(tab).classList.remove('hidden');
+            document.getElementById(tab + '-form-section').classList.remove('hidden');
+            const activeButton = document.getElementById(tab + '-tab');
+            activeButton.classList.add('bg-white', 'text-indigo-600', 'shadow-sm');
+            activeButton.classList.remove('text-gray-600', 'hover:text-indigo-600');
+            if (loadingState[tab]) {
+                showOrHideLoading(tab, true);
+            }
+        }
+
+        // Show Manual tab and scatter sub-tab by default
+        document.addEventListener('DOMContentLoaded', function () {
+            showMainTab('manual');
+        });
         // Biến toàn cục lưu trạng thái loading của từng filter
         const loadingState = {
             scatter: false,
             density: false,
-            violin: false
+            violin: false,
+            pearson: false,
+            spearman: false,
+            anova: false,
         };
-
         // Biến toàn cục dictionary lưu ID loading tương ứng
         const loadingIdDict = {
             scatter: 'scatter-loading',
             density: 'density-loading',
-            violin: 'violin-loading'
+            violin: 'violin-loading',
+            pearson: 'pearson-loading',
+            spearman: 'spearman-loading',
+            anova: 'anova-loading',
         };
-
         // Lấy các select cho trục X và Y của biểu đồ Density
-        
         const selectX = document.getElementById('select-density-x');
         const selectY = document.getElementById('select-density-y');
-
-        // Cập nhật các tùy chọn của select Y dựa trên giá trị đã chọn của select X
         function updateOptions(activeSelect, targetSelect) {
             const selectedValue = activeSelect.value;
             const options = targetSelect.querySelectorAll('option');
-
-            // Ẩn tất cả các tùy chọn trong select Y khi select X được chọn
-            // Mục đích là để tránh việc chọn cùng một cột cho cả hai trục
-            // Density Plot không cho phép chọn cùng một cột cho cả hai trục
             options.forEach(option => {
                 if (option.value === selectedValue) {
                     option.hidden = true;
@@ -306,99 +305,53 @@
                 }
             });
         }
-
-        selectX.addEventListener('change', () => {
+        if (selectX && selectY) {
+            selectX.addEventListener('change', () => {
+                updateOptions(selectX, selectY);
+            });
+            selectY.addEventListener('change', () => {
+                updateOptions(selectY, selectX);
+            });
+            // Gọi khi load lần đầu
             updateOptions(selectX, selectY);
-        });
-
-        selectY.addEventListener('change', () => {
             updateOptions(selectY, selectX);
-        });
-
-        // Gọi khi load lần đầu
-        updateOptions(selectX, selectY);
-        updateOptions(selectY, selectX);
-
+        }
         function showOrHideLoading(loadingKey, show) {
             const loadingId = loadingIdDict[loadingKey];
             const loadingElement = document.getElementById(loadingId);
-            if (show) {
-                loadingElement.classList.remove('hidden');
-            } else {
-                loadingElement.classList.add('hidden');
+            if (loadingElement) {
+                if (show) {
+                    loadingElement.classList.remove('hidden');
+                } else {
+                    loadingElement.classList.add('hidden');
+                }
             }
         }
-
-        function showTab(tab) {
-            // Ẩn tất cả các tab và phần lọc và loading
+        // Show/hide only the chart/filter sections inside manual tab
+        function showManualSubTab(tab) {
             const tabs = ['scatter', 'density', 'violin'];
             tabs.forEach(t => {
-                document.getElementById(t).classList.add('hidden');
-                document.getElementById(t + '-form-section').classList.add('hidden');
+                const tabPane = document.getElementById(t);
+                const formSection = document.getElementById(t + '-form-section');
+                if (tabPane) tabPane.classList.add('hidden');
+                if (formSection) formSection.classList.add('hidden');
                 const tabButton = document.getElementById(t + '-tab');
-                tabButton.classList.remove('bg-white', 'text-indigo-600', 'shadow-sm');
-                tabButton.classList.add('text-gray-600', 'hover:text-indigo-600');
-                // Ẩn loading
+                if (tabButton) {
+                    tabButton.classList.remove('bg-white', 'text-indigo-600', 'shadow-sm');
+                    tabButton.classList.add('text-gray-600', 'hover:text-indigo-600');
+                }
                 showOrHideLoading(t, false);
             });
-            // Hiện tab và phần lọc tương ứng
-            document.getElementById(tab).classList.remove('hidden');
-            document.getElementById(tab + '-form-section').classList.remove('hidden');
-            const activeButton = document.getElementById(tab + '-tab');
-            activeButton.classList.add('bg-white', 'text-indigo-600', 'shadow-sm');
-            activeButton.classList.remove('text-gray-600', 'hover:text-indigo-600');
-
-            // Hiện loading nếu đang vẽ lại biểu đồ
+            if (document.getElementById(tab)) document.getElementById(tab).classList.remove('hidden');
+            if (document.getElementById(tab + '-form-section')) document.getElementById(tab + '-form-section').classList.remove('hidden');
+            if (document.getElementById(tab + '-tab')) {
+                document.getElementById(tab + '-tab').classList.add('bg-white', 'text-indigo-600', 'shadow-sm');
+                document.getElementById(tab + '-tab').classList.remove('text-gray-600', 'hover:text-indigo-600');
+            }
             if (loadingState[tab]) {
                 showOrHideLoading(tab, true);
             }
         }
-
-        function startDrawingState(imageIds, loadingKey, buttonId) {
-            // Ẩn tất cả hình ảnh biểu đồ
-            imageIds.forEach(imageId => {
-                document.getElementById(imageId).style.display = 'none';
-            });
-
-            // Set trạng thái loading
-            loadingState[loadingKey] = true;
-
-            // Lấy ID loading tương ứng
-            const loadingId = loadingIdDict[loadingKey];
-
-            // Hiện loading
-            document.getElementById(loadingId).classList.remove('hidden');
-
-            // Disable button
-            document.getElementById(buttonId).disabled = true;
-        }
-
-        function finishDrawingState(imageIds, loadingKey, buttonId) {
-
-            // Set trạng thái loading về false
-            loadingState[loadingKey] = false;
-
-            // lay ID loading tương ứng
-            const loadingId = loadingIdDict[loadingKey];
-
-            // Ẩn loading
-            document.getElementById(loadingId).classList.add('hidden');
-
-            // Enable button
-            document.getElementById(buttonId).disabled = false;
-
-            // Hiện tất cả hình ảnh biểu đồ
-            imageIds.forEach(imageId => {
-                document.getElementById(imageId).style.display = '';
-            });
-
-        }
-
-        // Show first tab on load
-        document.addEventListener('DOMContentLoaded', function () {
-            showTab('scatter');
-        });
-
         // Add smooth transitions to form elements
         const selects = document.querySelectorAll('select');
         selects.forEach(select => {
@@ -409,106 +362,283 @@
                 this.parentElement.classList.remove('transform', 'scale-105');
             });
         });
-
         // AJAX scatter filter
-        document.getElementById('scatter-filter-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const imageIds = ['scatter-plot-img'];
-            const loadingKey = 'scatter';
-            const buttonId = 'update-scatter-btn';
-
-            startDrawingState(imageIds, loadingKey, buttonId);
-
-            // Lấy dữ liệu từ form
-            const formData = new FormData(this);
-            const data = {};
-            formData.forEach((value, key) => { data[key] = value; });
-            fetch('/correlation/scatter_plot', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-                .then(response => response.json())
-                .then(res => {
-                    if (res.scatter_plot_url) {
-                        document.getElementById('scatter-plot-img').src = res.scatter_plot_url + '?t=' + Date.now();
-                    }
+        const scatterForm = document.getElementById('scatter-filter-form');
+        if (scatterForm) {
+            scatterForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const imageIds = ['scatter-plot-img'];
+                const loadingKey = 'scatter';
+                const buttonId = 'update-scatter-btn';
+                startDrawingState(imageIds, loadingKey, buttonId);
+                const formData = new FormData(this);
+                const data = {};
+                formData.forEach((value, key) => { data[key] = value; });
+                fetch('/correlation/scatter_plot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
                 })
-                .catch(() => { alert('Có lỗi khi vẽ lại biểu đồ!'); })
-                .finally(() => {
-                    finishDrawingState(imageIds, loadingKey, buttonId);
-                });
-        });
-
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.scatter_plot_url) {
+                            document.getElementById('scatter-plot-img').src = res.scatter_plot_url + '?t=' + Date.now();
+                        }
+                    })
+                    .catch(() => { alert('Có lỗi khi vẽ lại biểu đồ!'); })
+                    .finally(() => {
+                        finishDrawingState(imageIds, loadingKey, buttonId);
+                    });
+            });
+        }
         // AJAX density filter
-        document.getElementById('density-filter-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            let imageIds = ['density-2d-plot-img', 'density-1d-plot-img'];
-            const loadingKey = 'density';
-            const buttonId = 'update-density-btn';
-
-            startDrawingState(imageIds, loadingKey, buttonId);
-
-            // Lấy dữ liệu từ form
-            const formData = new FormData(this);
-            const data = {};
-            formData.forEach((value, key) => { data[key] = value; });
-            fetch('/correlation/density_plot', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-                .then(response => response.json())
-                .then(res => {
-                    if (res.density_2d_plot_url) {
-                        document.getElementById('density-2d-plot-img').src = res.density_2d_plot_url + '?t=' + Date.now();
-                    }
-                    if (res.density_1d_plot_url) {
-                        document.getElementById('density-1d-plot-img').src = res.density_1d_plot_url + '?t=' + Date.now();
-                    }
-                    else {
-                        // Nếu không có 1D plot, ẩn nó
-                        imageIds = imageIds.filter(id => id !== 'density-1d-plot-img');
-                    }
+        const densityForm = document.getElementById('density-filter-form');
+        if (densityForm) {
+            densityForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                let imageIds = ['density-2d-plot-img', 'density-1d-plot-img'];
+                const loadingKey = 'density';
+                const buttonId = 'update-density-btn';
+                startDrawingState(imageIds, loadingKey, buttonId);
+                const formData = new FormData(this);
+                const data = {};
+                formData.forEach((value, key) => { data[key] = value; });
+                fetch('/correlation/density_plot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
                 })
-                .catch(() => { alert('Có lỗi khi vẽ lại biểu đồ!'); })
-                .finally(() => {
-                    finishDrawingState(imageIds, loadingKey, buttonId);
-                });
-        });
-
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.density_2d_plot_url) {
+                            document.getElementById('density-2d-plot-img').src = res.density_2d_plot_url + '?t=' + Date.now();
+                        }
+                        if (res.density_1d_plot_url) {
+                            document.getElementById('density-1d-plot-img').src = res.density_1d_plot_url + '?t=' + Date.now();
+                        }
+                        else {
+                            imageIds = imageIds.filter(id => id !== 'density-1d-plot-img');
+                        }
+                    })
+                    .catch(() => { alert('Có lỗi khi vẽ lại biểu đồ!'); })
+                    .finally(() => {
+                        finishDrawingState(imageIds, loadingKey, buttonId);
+                    });
+            });
+        }
         // AJAX violin filter
-        document.getElementById('violin-filter-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const imageIds = ['violin-plot-img'];
-            const loadingKey = 'violin';
-            const buttonId = 'update-violin-btn';
-
-            startDrawingState(imageIds, loadingKey, buttonId);
-
-            // Lấy dữ liệu từ form
-            const formData = new FormData(this);
-            const data = {};
-            formData.forEach((value, key) => { data[key] = value; });
-            fetch('/correlation/violin_plot', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-                .then(response => response.json())
-                .then(res => {
-                    if (res.violin_plot_url) {
-                        document.getElementById('violin-plot-img').src = res.violin_plot_url + '?t=' + Date.now();
-                    }
+        const violinForm = document.getElementById('violin-filter-form');
+        if (violinForm) {
+            violinForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const imageIds = ['violin-plot-img'];
+                const loadingKey = 'violin';
+                const buttonId = 'update-violin-btn';
+                startDrawingState(imageIds, loadingKey, buttonId);
+                const formData = new FormData(this);
+                const data = {};
+                formData.forEach((value, key) => { data[key] = value; });
+                fetch('/correlation/violin_plot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
                 })
-                .catch(() => { alert('Có lỗi khi vẽ lại biểu đồ!'); })
-                .finally(() => {
-                    finishDrawingState(imageIds, loadingKey, buttonId);
-                });
-        });
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.violin_plot_url) {
+                            document.getElementById('violin-plot-img').src = res.violin_plot_url + '?t=' + Date.now();
+                        }
+                    })
+                    .catch(() => { alert('Có lỗi khi vẽ lại biểu đồ!'); })
+                    .finally(() => {
+                        finishDrawingState(imageIds, loadingKey, buttonId);
+                    });
+            });
+        }
+        function startDrawingState(imageIds, loadingKey, buttonId) {
+            imageIds.forEach(imageId => {
+                const img = document.getElementById(imageId);
+                if (img) img.style.display = 'none';
+            });
+            loadingState[loadingKey] = true;
+            const loadingId = loadingIdDict[loadingKey];
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) loadingEl.classList.remove('hidden');
+            const btn = document.getElementById(buttonId);
+            if (btn) btn.disabled = true;
+        }
+        function finishDrawingState(imageIds, loadingKey, buttonId) {
+            loadingState[loadingKey] = false;
+            const loadingId = loadingIdDict[loadingKey];
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) loadingEl.classList.add('hidden');
+            const btn = document.getElementById(buttonId);
+            if (btn) btn.disabled = false;
+            imageIds.forEach(imageId => {
+                const img = document.getElementById(imageId);
+                if (img) img.style.display = '';
+            });
+        }
+
+        // --- Auto Analysis sub-tabs logic (Pearson/Spearman/ANOVA) ---
+        function showAutoTab(tab) {
+            const tabs = ['pearson', 'spearman', 'anova'];
+            tabs.forEach(t => {
+                document.getElementById(t).classList.add('hidden');
+                const tabButton = document.getElementById(t + '-tab');
+                if (tabButton) {
+                    tabButton.classList.remove('bg-white', 'text-indigo-600', 'shadow-sm');
+                    tabButton.classList.add('text-gray-600', 'hover:text-indigo-600');
+                }
+            });
+            // Show selected tab pane (if exists)
+            document.getElementById(tab).classList.remove('hidden');
+            const activeButton = document.getElementById(tab + '-tab');
+            if (activeButton) {
+                activeButton.classList.add('bg-white', 'text-indigo-600', 'shadow-sm');
+                activeButton.classList.remove('text-gray-600', 'hover:text-indigo-600');
+            }
+        }
+
+        // Xóa các kết quả auto analysis cũ nếu có
+        function clearAutoResults() {
+            let resultDiv = document.getElementById('auto-pearson-result-wrapper');
+            if (resultDiv) resultDiv.remove();
+            resultDiv = document.getElementById('auto-spearman-result-wrapper');
+            if (resultDiv) resultDiv.remove();
+            resultDiv = document.getElementById('auto-anova-result-wrapper');
+            if (resultDiv) resultDiv.remove();
+        }
+
+
+        // Auto Analysis
+
+        async function fetchPearsonCorrelation() {
+            try {
+                const res = await fetch('/correlation/auto/pearson');
+                const data = await res.json();
+
+                showOrHideLoading('pearson', false);
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Hiển thị kết quả Pearson
+                const resultDiv = document.createElement('div');
+                resultDiv.id = 'auto-pearson-result-wrapper';
+                resultDiv.className = 'mt-8';
+                resultDiv.innerHTML = `<div class='mb-6'><img src='${data.pearson_matrix_url}' class='mx-auto rounded-xl max-w-full'></div>`;
+                if (data.pearson_scatter_paths && data.pearson_scatter_paths.length > 0) {
+                    resultDiv.innerHTML += `<h4 class='font-bold text-lg mb-2'>Top ${data.pearson_plot_count} cặp thuộc tính tương quan mạnh nhất:</h4>`;
+                    data.pearson_scatter_paths.forEach((url, idx) => {
+                        resultDiv.innerHTML += `<div class='mb-4'><img src='${url}' class='mx-auto rounded-xl max-w-full'></div>`;
+                    });
+                }
+                const pearsonResultDiv = document.getElementById('auto-pearson-result');
+                pearsonResultDiv.parentElement.appendChild(resultDiv);
+            } catch (e) {
+                showOrHideLoading('spearman', false);
+                alert('Có lỗi khi phân tích Pearson tự động!');
+            }
+        }
+
+        async function fetchSpearmanCorrelation() {
+            try {
+                const res = await fetch('/correlation/auto/spearman');
+                const data = await res.json();
+
+                showOrHideLoading('spearman', false);
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Hiển thị kết quả Spearman
+                const resultDiv = document.createElement('div');
+                resultDiv.id = 'auto-spearman-result-wrapper';
+                resultDiv.className = 'mt-8';
+                resultDiv.innerHTML = `<div class='mb-6'><img src='${data.spearman_matrix_url}' class='mx-auto rounded-xl max-w-full'></div>`;
+                if (data.spearman_scatter_paths && data.spearman_scatter_paths.length > 0) {
+                    resultDiv.innerHTML += `<h4 class='font-bold text-lg mb-2'>Top ${data.spearman_plot_count} cặp thuộc tính tương quan mạnh nhất:</h4>`;
+                    data.spearman_scatter_paths.forEach((url, idx) => {
+                        resultDiv.innerHTML += `<div class='mb-4'><img src='${url}' class='mx-auto rounded-xl max-w-full'></div>`;
+                    });
+                }
+                const spearmanResultDiv = document.getElementById('auto-spearman-result');
+                spearmanResultDiv.parentElement.appendChild(resultDiv);
+
+            } catch (e) {
+                showOrHideLoading('spearman', false);
+                alert('Có lỗi khi phân tích Spearman tự động!');
+            }
+        }
+
+        async function fetchAnovaAnalysis() {
+            try {
+                const res = await fetch('/correlation/auto/anova');
+                const data = await res.json();
+
+                showOrHideLoading('anova', false);
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Hiển thị kết quả ANOVA
+                const resultDiv = document.createElement('div');
+                resultDiv.id = 'auto-anova-result-wrapper';
+                resultDiv.className = 'mt-8';
+                if (data.anova_paths && data.anova_paths.length > 0) {
+                    resultDiv.innerHTML += `<h4 class='font-bold text-lg mb-2'>Top ${data.plot_count} cặp thuộc tính có sự khác biệt rõ rệt theo ANOVA (p < 0.05):</h4>`;
+                    data.anova_paths.forEach((url, idx) => {
+                        resultDiv.innerHTML += `<div class='mb-4'><img src='${url}' class='mx-auto rounded-xl max-w-full'></div>`;
+                    });
+                }
+                
+                const anovaResultDiv = document.getElementById('auto-anova-result');
+                anovaResultDiv.parentElement.appendChild(resultDiv);
+
+            } catch (e) {
+                showOrHideLoading('anova', false);
+                alert('Có lỗi khi phân tích ANOVA tự động!');
+            }
+        }
+
+        async function autoAnalysis() {
+            // Disable auto button
+            const autoBtn = document.getElementById('correlation-auto-btn');
+            if (autoBtn) {
+                autoBtn.disabled = true;
+            }
+
+            // Xóa các plot cũ nếu có
+            clearAutoResults();
+
+            // Hiện loading các plot
+            showOrHideLoading('pearson', true);
+            showOrHideLoading('spearman', true);
+            showOrHideLoading('anova', true);
+
+            const pearsonResultDiv = document.getElementById('auto-pearson-result');
+            const spearmanResultDiv = document.getElementById('auto-spearman-result');
+            const anovaResultDiv = document.getElementById('auto-anova-result');
+
+            // Ajax request Pearson correlation
+            await fetchPearsonCorrelation();
+
+            // Ajax request Spearman correlation
+            await fetchSpearmanCorrelation();
+
+            // Ajax request ANOVA analysis
+            await fetchAnovaAnalysis();
+
+            // Enable auto button again
+            if (autoBtn) {
+                autoBtn.disabled = false;
+            }
+        }
+
 
     </script>
 </body>

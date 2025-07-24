@@ -1,0 +1,62 @@
+<!-- correlation_manual.html: Manual Analysis Tab Content extracted from correlation.html -->
+<!-- Sub-tabs for manual analysis -->
+<div class="mb-8">
+    <div class="flex justify-center">
+        <nav class="flex space-x-2 bg-gray-50 p-1 rounded-2xl" id="plotTabs">
+            <button class="py-2 px-5 bg-white text-indigo-600 rounded-xl font-bold shadow-sm focus:outline-none transition-all duration-300" id="scatter-tab" onclick="showTab('scatter')">
+                <i class="fa-solid fa-chart-line mr-2"></i>Scatter Plot
+            </button>
+            <button class="py-2 px-5 text-gray-600 hover:text-indigo-600 rounded-xl font-bold focus:outline-none transition-all duration-300" id="density-tab" onclick="showTab('density')">
+                <i class="fa-solid fa-chart-area mr-2"></i>Density Plot
+            </button>
+            <button class="py-2 px-5 text-gray-600 hover:text-indigo-600 rounded-xl font-bold focus:outline-none transition-all duration-300" id="violin-tab" onclick="showTab('violin')">
+                <i class="fa-solid fa-chart-column mr-2"></i>Violin Plot
+            </button>
+        </nav>
+    </div>
+</div>
+<!-- Form Controls -->
+<div id="scatter-form-section">
+    {% include 'correlation/correlation_scatter.html' %}
+</div>
+<div id="density-form-section" class="hidden">
+    {% include 'correlation/correlation_density.html' %}
+</div>
+<div id="violin-form-section" class="hidden">
+    {% include 'correlation/correlation_violin.html' %}
+</div>
+<!-- Charts Display Area -->
+<div class="bg-white rounded-2xl shadow-inner p-8 min-h-[500px]">
+    <div class="tab-content">
+        <div id="scatter" class="tab-pane">
+            <div class="text-center">
+                <img id="scatter-plot-img" src="{{ scatter_plot_url }}" alt="Scatter Plot" class="mx-auto rounded-xl max-w-full">
+            </div>
+        </div>
+        <div id="density" class="tab-pane hidden">
+            <div class="text-center mb-6">
+                <img id="density-2d-plot-img" src="{{ density_2d_plot_url }}" alt="Density 2D Plot" class="mx-auto rounded-xl max-w-full">
+            </div>
+            <div class="text-center">
+                <img id="density-1d-plot-img" src="{{ density_1d_plot_url }}" alt="Density 1D Plot" class="mx-auto rounded-xl max-w-full">
+            </div>
+        </div>
+        <div id="violin" class="tab-pane hidden">
+            <div class="text-center">
+                <img id="violin-plot-img" src="{{ violin_plot_url }}" alt="Violin Plot" class="mx-auto rounded-xl max-w-full">
+            </div>
+        </div>
+    </div>
+    <div id="scatter-loading" class="hidden text-center py-8">
+        <i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-500 mb-4"></i>
+        <p class="text-lg text-gray-500">Đang vẽ lại biểu đồ...</p>
+    </div>
+    <div id="density-loading" class="hidden text-center py-8">
+        <i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-500 mb-4"></i>
+        <p class="text-lg text-gray-500">Đang vẽ lại biểu đồ...</p>
+    </div>
+    <div id="violin-loading" class="hidden text-center py-8">
+        <i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-500 mb-4"></i>
+        <p class="text-lg text-gray-500">Đang vẽ lại biểu đồ...</p>
+    </div>
+</div>
