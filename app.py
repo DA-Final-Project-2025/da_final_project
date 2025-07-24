@@ -5,7 +5,9 @@ import pandas as pd
 from utils.analysis import describe_numeric, generate_boxplot_svgs, generate_feature_distribution_svgs
 from utils.correlation import generate_correlation_plots, generate_scatter_plot, generate_density_plot, generate_violin_plot
 from utils.explainable.async_get_explainable import async_get_explainable
-from utils.explainable.shap import plot_shap, plot_shap_specific_feature
+from utils.explainable.lime_explainer import explain_instance
+from utils.explainable.shap_explainer import plot_shap, plot_shap_specific_feature
+from utils.explainable.train_model import get_x_test
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -126,7 +128,7 @@ def explainable():
     drop_cols = ['Unnamed: 0', 'id', 'name', 'description', 'current_seller']
 
     features = [col for col in df.columns if col not in drop_cols + [target]]
-    return render_template('explainable/index.html', features=features)
+    return render_template('explainable/index.html', features=features, instances = int(df.shape[0] * 0.2))
 
 @app.route('/shap/<feature>')
 def shap(feature):
@@ -135,6 +137,10 @@ def shap(feature):
 @app.route('/shap/specific/<feature>')
 def shap_specific_feature(feature):
     return plot_shap_specific_feature(feature)
+
+@app.route('/lime/<instance>')
+def lime_instance(instance):
+    return explain_instance(instance)
 
 # Dashboard (nếu cần)
 @app.route('/dashboard')
