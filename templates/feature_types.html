@@ -180,7 +180,7 @@
             </div>
             
             <!-- Charts grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-[1600px]">
+            <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8 lg:w-[1024px] 2xl:w-[1600px]">
                 {% for col in numeric_cols + categorical_cols %}
                     {% if col != 'description' and col != 'name' %}
                         <div class="chart-container rounded-2xl p-6 card-hover border border-gray-200/50 backdrop-blur-sm">
