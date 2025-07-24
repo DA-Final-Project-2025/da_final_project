@@ -1,4 +1,5 @@
-from utils.explainable.shap import get_shap
+from utils.explainable.shap_explainer import init_shap
+from utils.explainable.train_model import train_model
 
 
 def async_get_explainable(app):
@@ -18,20 +19,19 @@ def async_get_explainable(app):
 
         # 👇 Sinh ảnh mới
         tree_based = get_tree_based(app)
-        lime = get_lime(app)
-        result = {**tree_based, **lime}
-        for key, b64_img in result.items():
+        for key, b64_img in tree_based.items():
             with open(f"static/{key}.png", "wb") as f:
                 f.write(base64.b64decode(b64_img))
 
-    def execute_shap():
+    def execute_train_model():
         try:
-            get_shap(app)
+            res = train_model(app)
+            init_shap(res['model'], res['X_test'])
         except Exception as e:
             print(f"SHAP error: {e}")
 
     threading.Thread(target=get_explainable).start()
-    threading.Thread(target=execute_shap).start()
+    threading.Thread(target=execute_train_model).start()
 
 
 def get_tree_based(app):
@@ -121,90 +121,4 @@ def get_tree_based(app):
         'feature_chart': feature_chart,
         'model_performance': perf_chart,
         'tree_structure': tree_chart
-    }
-
-def get_lime(app):
-    import os, glob, io, base64
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    from sklearn.model_selection import train_test_split
-    from sklearn.preprocessing import LabelEncoder
-    from sklearn.linear_model import LinearRegression
-    from lime.lime_tabular import LimeTabularExplainer
-
-    print("Start handle LIME")
-
-    def fig_to_base64(fig):
-        buf = io.BytesIO()
-        fig.savefig(buf, format='png', bbox_inches='tight')
-        plt.close(fig)
-        buf.seek(0)
-        return base64.b64encode(buf.read()).decode('utf-8')
-
-    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
-    if not files:
-        return {'error': 'Không tìm thấy file dữ liệu'}
-
-    filepath = max(files, key=os.path.getctime)
-    df = pd.read_csv(filepath)
-
-    if 'quantity_sold' not in df.columns:
-        return {'error': "Thiếu cột 'quantity_sold' để làm nhãn"}
-
-    categorical_features = ['brand', 'fulfillment_type', 'category']
-    for col in categorical_features:
-        df[col] = LabelEncoder().fit_transform(df[col].astype(str))
-    numeric_features = [
-        'original_price', 'price', 'review_count',
-        'rating_average', 'favourite_count',
-        'number_of_images', 'vnd_cashback',
-        'has_video'
-    ]
-    df = df.dropna(subset=numeric_features + ['quantity_sold'])
-
-    X = df[numeric_features + categorical_features]
-    y = df['quantity_sold']
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Huấn luyện model đơn giản
-    model = LinearRegression()
-    model.fit(X_train, y_train)
-
-    # 1️⃣ LIME Local Explanation (cho sample đầu tiên của X_test)
-    explainer = LimeTabularExplainer(
-        training_data=X_train.values,
-        feature_names=X.columns.tolist(),
-        mode='regression'
-    )
-    instance_idx = 0
-    explanation = explainer.explain_instance(
-        data_row=X_test.iloc[instance_idx].values,
-        predict_fn=model.predict
-    )
-    fig_local = explanation.as_pyplot_figure()
-    lime_local_base64 = fig_to_base64(fig_local)
-
-    # 2️⃣ Feature Contribution (tổng trọng số mô hình)
-    coef = model.coef_
-    fig_feat = plt.figure()
-    plt.barh(X.columns, coef, color='coral')
-    plt.xlabel("Weight")
-    plt.title("Feature Contribution (Linear Model)")
-    feature_contribution_base64 = fig_to_base64(fig_feat)
-
-    # 3️⃣ LIME Instance Explanation (cho sample #3 nếu có)
-    instance_idx_3 = min(2, len(X_test) - 1)
-    explanation_3 = explainer.explain_instance(
-        data_row=X_test.iloc[instance_idx_3].values,
-        predict_fn=model.predict
-    )
-    fig_instance = explanation_3.as_pyplot_figure()
-    lime_instance_base64 = fig_to_base64(fig_instance)
-
-    print("Done LIME")
-    return {
-        'lime_local_explanation': lime_local_base64,
-        'feature_contribution_chart': feature_contribution_base64,
-        'lime_instance_explanation': lime_instance_base64
     }

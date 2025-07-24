@@ -1,59 +1,10 @@
 import joblib
 import os, glob, io, base64
-import pandas as pd
 import shap
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import LabelEncoder
 
-def get_shap(app):
-    print("Start handle SHAP")
-
-    # Load file CSV mới nhất
-    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
-    if not files:
-        return {'error': 'Không tìm thấy file dữ liệu'}
-
-    filepath = max(files, key=os.path.getctime)
-    df = pd.read_csv(filepath)
-
-    if 'quantity_sold' not in df.columns:
-        return {'error': "Thiếu cột 'quantity_sold' để làm nhãn"}
-
-    # Encode và chuẩn bị dữ liệu
-    # Biến mục tiêu
-    target = 'quantity_sold'
-
-    # Loại các cột không có ý nghĩa dự đoán
-    drop_cols = ['Unnamed: 0', 'id', 'name', 'description', 'current_seller']
-
-    # Mã hóa các cột dạng object (categorical)
-    df_encoded = df.copy()
-    for col in df_encoded.select_dtypes(include='object').columns:
-        df_encoded[col] = LabelEncoder().fit_transform(df_encoded[col].astype(str))
-    for col in df_encoded.select_dtypes(include='bool').columns:
-        df_encoded[col] = df_encoded[col].astype(int)
-
-    # Lấy danh sách các đặc trưng đầu vào
-    features = [col for col in df.columns if col not in drop_cols + [target]]
-
-    df = df_encoded.dropna(subset=features + ['quantity_sold'])
-    # Tách dữ liệu huấn luyện
-    X = df_encoded[features]
-    y = df_encoded[target]
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-
-    # Train/test split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-
-    # Train model
-    model = RandomForestRegressor(n_estimators=100)
-    model.fit(X_train, y_train)
-
+def init_shap(model, X_test):
+    print("Start init shap")
     # SHAP explainer
     explainer = shap.TreeExplainer(model)
     shap_values = explainer(X_test)
@@ -61,9 +12,8 @@ def get_shap(app):
     save_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../static'))
     os.makedirs(save_dir, exist_ok=True)
     joblib.dump(shap_values, os.path.join(save_dir, 'shap_values.pkl'))
-    joblib.dump(X_test, os.path.join(save_dir, 'X_test_shap.pkl'))
 
-    print("Done SHAP")
+    print("Done init shap")
     return None
 
 
