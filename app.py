@@ -128,8 +128,7 @@ def explainable():
     drop_cols = ['Unnamed: 0', 'id', 'name', 'description', 'current_seller']
 
     features = [col for col in df.columns if col not in drop_cols + [target]]
-    X_test = get_x_test()
-    return render_template('explainable/index.html', features=features, instances = len(X_test))
+    return render_template('explainable/index.html', features=features, instances = int(df.shape[0] * 0.2))
 
 @app.route('/shap/<feature>')
 def shap(feature):

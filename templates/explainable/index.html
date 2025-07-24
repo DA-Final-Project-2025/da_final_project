@@ -228,11 +228,7 @@
             }
             document.getElementById('shap-summary-plot').innerHTML = `<img src="data:image/png;base64,${data.shap_summary_plot}" class="rounded-xl shadow-md" />`;
             document.getElementById('shap_specific_feature').innerHTML = `<img src="data:image/png;base64,${data.shap_specific_feature}" class="rounded-xl shadow-md" />`;
-
-            document.getElementById('shap-waterfall-chart-loading').classList.add('hidden');
-            const shapWaterfall = document.getElementById('shap-waterfall-chart-image');
-            shapWaterfall.innerHTML = `<img src="data:image/png;base64,${data.shap_waterfall_chart}" class="rounded-xl shadow-md" />`;
-            shapWaterfall.classList.remove('hidden');
+            document.getElementById('shap-waterfall-chart').innerHTML = `<img src="data:image/png;base64,${data.shap_waterfall_chart}" class="rounded-xl shadow-md" />`;
         }
 
          async function fetchLime() {
