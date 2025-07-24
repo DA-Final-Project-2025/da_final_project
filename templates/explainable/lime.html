@@ -1,0 +1,216 @@
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Boxplot các thuộc tính số</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'float': 'float 6s ease-in-out infinite',
+                        'tab-slide': 'tabSlide 0.3s ease-out',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes tabSlide {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-indicator {
+            position: absolute;
+            bottom: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8b5cf6, #a855f7);
+            border-radius: 2px 2px 0 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+    <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-2">
+            LIME Analysis
+        </h2>
+        <p class="text-gray-600">Local Interpretable Model-agnostic Explanations</p>
+    </div>
+
+    <!-- LIME Instance Selection -->
+<!--    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">-->
+<!--        <div class="flex items-center justify-between mb-4">-->
+<!--            <div class="flex items-center gap-3">-->
+<!--                <div-->
+<!--                    class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">-->
+<!--                    <i class="fa-solid fa-sliders text-white"></i>-->
+<!--                </div>-->
+<!--                <div>-->
+<!--                    <h3 class="text-xl font-bold text-gray-800">Instance Selection</h3>-->
+<!--                    <p class="text-sm text-gray-500">Chọn instance để giải thích</p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="flex gap-2">-->
+<!--                <select id="selected-instance"-->
+<!--                    class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500">-->
+<!--                    {% for i in range(1, instances) %}-->
+<!--                        <option value="{{i}}">Instance {{ i }}</option>-->
+<!--                    {% endfor %}-->
+<!--                </select>-->
+<!--                <button onclick="explainLime()"-->
+<!--                    class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-shadow">-->
+<!--                    Explain-->
+<!--                </button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div id="lime-instance-explanation"-->
+<!--            class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl flex items-center justify-center border border-orange-100 flex justify-center items-center">-->
+<!--            <div id="lime-instance-explanation-loading" class="flex items-center justify-center h-96 animate-pulse">-->
+<!--                <i class="fa-solid fa-spinner fa-spin text-orange-700 text-2xl"></i>-->
+<!--                <span class="ml-3 text-orange-700">Đang tạo LIME Instance Explanation...</span>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+        <!-- Header section -->
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-sliders text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Instance Selection</h3>
+                    <p class="text-sm text-gray-500">Chọn instance để xem chi tiết và giải thích</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <select id="selected-instance"
+                    class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500"
+                    onchange="displayInstanceDetails(this.value)">
+                    {% for i in range(1, instances) %}
+                        <option value="{{i}}">Instance {{ i }}</option>
+                    {% endfor %}
+                </select>
+                <button onclick="explainLime()"
+                    class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-shadow">
+                    Explain
+                </button>
+            </div>
+        </div>
+
+        <!-- Instance Details Section -->
+        <div id="lime-instance-details" class="bg-orange-50 rounded-xl border border-orange-100 p-4 mb-6">
+            <h4 class="text-md font-semibold text-gray-700 mb-2">📋 Thông tin đặc trưng của Instance</h4>
+            <div id="lime-instance-details-loading" class="hidden flex items-center justify-center h-20 animate-pulse">
+                <i class="fa-solid fa-spinner fa-spin text-orange-700 text-xl"></i>
+                <span class="ml-3 text-orange-700">Đang tải thông tin instance...</span>
+            </div>
+
+            <div id="instance-details" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-800">
+                <!-- Nội dung sẽ được thêm vào động -->
+            </div>
+        </div>
+
+        <!-- LIME Explanation Plot Section -->
+        <div id="lime-instance-explanation" class="bg-white rounded-xl border border-orange-100 p-4">
+            <h4 class="text-md font-semibold text-gray-700 mb-2">📊 Biểu đồ LIME Explanation</h4>
+            <div id="lime-instance-explanation-loading" class="flex items-center justify-center h-96 animate-pulse">
+                <i class="fa-solid fa-spinner fa-spin text-orange-700 text-2xl"></i>
+                <span class="ml-3 text-orange-700">Đang tạo biểu đồ LIME...</span>
+            </div>
+
+            <div id="lime-plot-container" class="flex justify-center items-center">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function explainLime() {
+            const selectedInstance = document.getElementById("selected-instance").value;
+            const res = await fetch('/lime/' + selectedInstance);
+            const data = await res.json();
+            if (!res.ok) {
+                const errText = await res.text();
+                return;
+            }
+            document.getElementById('lime-plot-container').innerHTML =
+                    `<img src="data:image/png;base64,${data.plot}" class="rounded-xl shadow-md" />`;
+            document.getElementById('lime-instance-explanation-loading').style.display = 'none';
+
+            const details = data.instance_details;
+            const container = document.getElementById("instance-details");
+
+            if (!details) {
+                container.innerHTML = `<p class="text-red-500">Không tìm thấy dữ liệu cho Instance ${instanceId}</p>`;
+                return;
+            }
+
+            container.innerHTML = Object.entries(details).map(([key, value]) => `
+                <div class="flex justify-between border-b pb-1">
+                    <span class="font-medium text-gray-600">${key}</span>
+                    <span>${value}</span>
+                </div>
+            `).join("");
+        }
+    </script>
+</body>
+
+</html>

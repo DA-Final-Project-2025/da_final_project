@@ -3,6 +3,12 @@ import os
 import time
 import pandas as pd
 from utils.analysis import describe_numeric, generate_boxplot_svgs, generate_feature_distribution_svgs
+from utils.correlation import generate_correlation_plots, generate_scatter_plot, generate_density_plot, generate_violin_plot
+from utils.explainable.async_get_explainable import async_get_explainable
+from utils.explainable.lime_explainer import explain_instance
+from utils.explainable.shap_explainer import plot_shap, plot_shap_specific_feature
+from utils.explainable.train_model import get_x_test
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 UPLOAD_FOLDER = 'uploads'
@@ -37,6 +43,7 @@ def analyze():
     file.save(filepath)
     try:
         df = pd.read_csv(filepath)
+        async_get_explainable(app)
     except Exception as e:
         flash(f'Lỗi đọc file: {e}')
         return redirect(url_for('index'))
@@ -103,6 +110,39 @@ def feature_types():
         feature_svgs=feature_svgs
     )
 
+
+@app.route('/explainable')
+def explainable():
+    import glob
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        flash('Chưa có file dữ liệu, vui lòng upload trước!')
+        return redirect(url_for('index'))
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+
+    # Biến mục tiêu
+    target = 'quantity_sold'
+
+    # Loại các cột không có ý nghĩa dự đoán
+    drop_cols = ['Unnamed: 0', 'id', 'name', 'description', 'current_seller']
+
+    features = [col for col in df.columns if col not in drop_cols + [target]]
+    X_test = get_x_test()
+    return render_template('explainable/index.html', features=features, instances = len(X_test))
+
+@app.route('/shap/<feature>')
+def shap(feature):
+    return plot_shap(feature)
+
+@app.route('/shap/specific/<feature>')
+def shap_specific_feature(feature):
+    return plot_shap_specific_feature(feature)
+
+@app.route('/lime/<instance>')
+def lime_instance(instance):
+    return explain_instance(instance)
+
 # Dashboard (nếu cần)
 @app.route('/dashboard')
 def dashboard():
@@ -112,6 +152,160 @@ def dashboard():
 @app.route('/dataset_info')
 def dataset_info():
     return render_template('dataset_info.html')
+
+
+# Route cho giao diện correlation plots
+@app.route('/correlation')
+def correlation():
+    import glob
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        flash('Chưa có file dữ liệu, vui lòng upload trước!')
+        return redirect(url_for('index'))
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    numeric_cols = [
+        "original_price", "price", "review_count", "rating_average",
+        "favourite_count", "number_of_images", "vnd_cashback", "quantity_sold"
+    ]
+    categorical_cols = [
+        "name", "fulfillment_type", "brand", "pay_later", "current_seller",
+        "has_video", "category"
+    ]
+    # Lấy giá trị cột từ từng dropdown
+    scatter_x = numeric_cols[0] if numeric_cols else None
+    scatter_y = numeric_cols[1] if len(numeric_cols) > 1 else (numeric_cols[0] if numeric_cols else None)
+    density_x = numeric_cols[0] if numeric_cols else None
+    density_y = numeric_cols[1] if len(numeric_cols) > 1 else (numeric_cols[0] if numeric_cols else None)
+    violin_cat = categorical_cols[0] if categorical_cols else None
+    violin_val = numeric_cols[0] if numeric_cols else None
+    
+    plot_dir = 'static/correlation'
+    scatter_path, density_2d_path, density_1d_path, violin_path = generate_correlation_plots(
+        df,
+        plot_dir,
+        x_col=scatter_x,
+        y_col=scatter_y,
+        density_x=density_x,
+        density_y=density_y,
+        violin_cat=violin_cat,
+        violin_val=violin_val
+    )
+    nrows = len(df)
+    return render_template(
+        'correlation/correlation.html',
+        filename=os.path.basename(filepath),
+        nrows=nrows,
+        scatter_plot_url='/' + scatter_path,
+        density_2d_plot_url='/' + density_2d_path,
+        density_1d_plot_url='/' + density_1d_path if density_1d_path else None,
+        violin_plot_url='/' + violin_path,
+        numeric_cols=numeric_cols,
+        categorical_cols=categorical_cols,
+        scatter_x=scatter_x,
+        scatter_y=scatter_y,
+        density_x=density_x,
+        density_y=density_y,
+        violin_cat=violin_cat,
+        violin_val=violin_val
+    )
+
+# AJAX endpoint để vẽ lại scatter plot
+@app.route('/correlation/scatter_plot', methods=['POST'])
+def scatter_plot_ajax():
+    import glob
+    from flask import jsonify
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        return jsonify({'error': 'No data file found'}), 400
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    numeric_cols = [
+        "original_price", "price", "review_count", "rating_average",
+        "favourite_count", "number_of_images", "vnd_cashback", "quantity_sold"
+    ]
+    
+    data = request.get_json()
+    scatter_x = data.get('scatter_x', numeric_cols[0] if numeric_cols else None)
+    scatter_y = data.get('scatter_y', numeric_cols[1] if len(numeric_cols) > 1 else (numeric_cols[0] if numeric_cols else None))
+    
+    plot_dir = 'static/correlation'
+    scatter_path = generate_scatter_plot(
+        df,
+        plot_dir,
+        x_col=scatter_x,
+        y_col=scatter_y
+    )
+    return jsonify({
+        'scatter_plot_url': '/' + scatter_path
+    })
+
+# AJAX endpoint để vẽ lại density plots
+@app.route('/correlation/density_plot', methods=['POST'])
+def density_plot_ajax():
+    import glob
+    from flask import jsonify
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        return jsonify({'error': 'No data file found'}), 400
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    numeric_cols = [
+        "original_price", "price", "review_count", "rating_average",
+        "favourite_count", "number_of_images", "vnd_cashback", "quantity_sold"
+    ]
+    
+    data = request.get_json()
+    density_x = data.get('density_x', numeric_cols[0] if numeric_cols else None)
+    density_y = data.get('density_y', numeric_cols[1] if len(numeric_cols) > 1 else (numeric_cols[0] if numeric_cols else None))
+    
+    plot_dir = 'static/correlation'
+    (density_2d_path, density_1d_path) = generate_density_plot(
+        df,
+        plot_dir,
+        density_x=density_x,
+        density_y=density_y
+    )
+    
+    return jsonify({
+        'density_2d_plot_url': '/' + density_2d_path,
+        'density_1d_plot_url': '/' + density_1d_path if density_1d_path else None,
+    })
+
+# AJAX endpoint để vẽ lại violin plots
+@app.route('/correlation/violin_plot', methods=['POST'])
+def violin_plot_ajax():
+    import glob
+    from flask import jsonify
+    files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.csv'))
+    if not files:
+        return jsonify({'error': 'No data file found'}), 400
+    filepath = max(files, key=os.path.getctime)
+    df = pd.read_csv(filepath)
+    numeric_cols = [
+        "original_price", "price", "review_count", "rating_average",
+        "favourite_count", "number_of_images", "vnd_cashback", "quantity_sold"
+    ]
+    categorical_cols = [
+        "name", "fulfillment_type", "brand", "pay_later", "current_seller",
+        "has_video", "category"
+    ]
+    data = request.get_json()
+    violin_cat = data.get('violin_cat', categorical_cols[0] if categorical_cols else None)
+    violin_val = data.get('violin_val', numeric_cols[0] if numeric_cols else None)
+    
+    print(f"Violin category: {violin_cat}, Violin value: {violin_val}")
+    plot_dir = 'static/correlation'
+    violin_path = generate_violin_plot(
+        df,
+        plot_dir,
+        violin_cat=violin_cat,
+        violin_val=violin_val
+    )
+    
+    return jsonify({
+        'violin_plot_url': '/' + violin_path
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)

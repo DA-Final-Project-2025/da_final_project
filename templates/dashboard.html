@@ -94,15 +94,14 @@
                     <span class="ml-auto bg-cyan-100 text-cyan-600 text-xs px-2 py-1 rounded-full">Feature</span>
                 </a>
                 <div class="space-y-1">
-                    <a href="/correlation" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-pink-50 hover:text-pink-600 transition-all duration-200 text-gray-600">
+                    <a href="/correlation" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-pink-50 hover:text-pink-600 transition-all duration-200 {% if request.path.startswith('/correlation') %}bg-pink-50 text-pink-600 border-r-2 border-pink-600{% else %}text-gray-600{% endif %}">
                         <i class="fas fa-project-diagram w-5 h-5 mr-3"></i>
                         <span>Tương Quan</span>
-                        <span class="ml-auto text-xs text-gray-400">Soon</span>
+                        <span class="ml-auto bg-pink-100 text-pink-600 text-xs px-2 py-1 rounded-full">Correlation</span>
                     </a>
-                    <a href="/trends" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200 text-gray-600">
-                        <i class="fas fa-trending-up w-5 h-5 mr-3"></i>
-                        <span>Xu Hướng</span>
-                        <span class="ml-auto text-xs text-gray-400">Soon</span>
+                    <a href="/explainable" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200 text-gray-600">
+                        <i class="fas fa-brain w-5 h-5 mr-3"></i>
+                        <span>Explainable</span>
                     </a>
                 </div>
             </div>
