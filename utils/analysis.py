@@ -67,11 +67,13 @@ def generate_feature_distribution_svgs(df):
 
     # Numeric: Histogram
     for col in numeric_cols:
-        fig, ax = plt.subplots(figsize=(4, 2.5))
+        fig, ax = plt.subplots(figsize=(4.5, 3.5))
         ax.hist(df[col].dropna(), bins=30, color='#90caf9', edgecolor='black')
         ax.set_title(f'Histogram: {col}', fontsize=11)
         ax.set_xlabel(col)
         ax.set_ylabel('Frequency')
+        ax.tick_params(axis='x', labelrotation=30)
+        
         fig.tight_layout()
         buf = io.BytesIO()
         fig.savefig(buf, format='svg')
@@ -81,7 +83,7 @@ def generate_feature_distribution_svgs(df):
     # Categorical: Pie (<=10) hoặc Bar (>10)
     for col in categorical_cols:
         value_counts = df[col].value_counts()
-        fig, ax = plt.subplots(figsize=(5, 3.5))  # tăng chiều ngang cho legend
+        fig, ax = plt.subplots(figsize=(4.5, 3.5))  # tăng chiều ngang cho legend
         vc = value_counts.copy()
         if len(vc) > 5:
             others = vc[5:].sum()

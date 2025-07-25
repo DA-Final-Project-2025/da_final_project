@@ -232,36 +232,30 @@
         }
 
          async function fetchLime() {
-            const imgPaths = {
-                lime_local_explanation: "/static/lime_local_explanation.png",
-                feature_contribution_chart: "/static/feature_contribution_chart.png",
-                lime_instance_explanation: "/static/lime_instance_explanation.png"
-            };
-            async function checkImage(path) {
-                try {
-                    const res = await fetch(path, {
-                        method: "HEAD"
-                    });
-                    return res.ok;
-                } catch {
-                    return false;
-                }
+            const selectedInstance = document.getElementById("selected-instance").value;
+            const res = await fetch('/lime/' + selectedInstance);
+            const data = await res.json();
+            if (data.error) {
+                return;
             }
-            const hasLocalExplanation = await checkImage(imgPaths.lime_local_explanation);
-            const hasContributionChart = await checkImage(imgPaths.feature_contribution_chart);
-            const hasInstanceExplanation = await checkImage(imgPaths.lime_instance_explanation);
-            if (hasLocalExplanation) {
-                document.getElementById('lime-local-explanation').innerHTML =
-                    `<img src="${imgPaths.lime_local_explanation}" class="rounded-xl shadow-md max-w-full h-auto" />`;
+            document.getElementById('lime-plot-container').innerHTML =
+                    `<img src="data:image/png;base64,${data.plot}" class="rounded-xl shadow-md" />`;
+            document.getElementById('lime-instance-explanation-loading').style.display = 'none';
+
+            const details = data.instance_details;
+            const container = document.getElementById("instance-details");
+
+            if (!details) {
+                container.innerHTML = `<p class="text-red-500">Không tìm thấy dữ liệu cho Instance ${instanceId}</p>`;
+                return;
             }
-            if (hasContributionChart) {
-                document.getElementById('feature-contribution-chart').innerHTML =
-                    `<img src="${imgPaths.feature_contribution_chart}" class="rounded-xl shadow-md max-w-full h-auto" />`;
-            }
-            if (hasInstanceExplanation) {
-                document.getElementById('lime-instance-explanation').innerHTML =
-                    `<img src="${imgPaths.lime_instance_explanation}" class="rounded-xl shadow-md max-w-full h-auto" />`;
-            }
+
+            container.innerHTML = Object.entries(details).map(([key, value]) => `
+                <div class="flex justify-between border-b pb-1">
+                    <span class="font-medium text-gray-600">${key}</span>
+                    <span>${value}</span>
+                </div>
+            `).join("");
         }
 
         function switchTab(tabName, element) {
