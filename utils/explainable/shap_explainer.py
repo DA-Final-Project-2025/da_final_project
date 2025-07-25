@@ -2,6 +2,7 @@ import joblib
 import os, glob, io, base64
 import shap
 import matplotlib.pyplot as plt
+from utils.explainable.train_model import get_x_test
 
 def init_shap(model, X_test):
     print("Start init shap")
@@ -51,15 +52,14 @@ def plot_shap(feature):
         static_dir = os.path.abspath(os.path.join(base_dir, '../../static'))
 
         shap_path = os.path.join(static_dir, 'shap_values.pkl')
-        x_test_path = os.path.join(static_dir, 'X_test_shap.pkl')
 
-        if not os.path.exists(shap_path) or not os.path.exists(x_test_path):
+        if not os.path.exists(shap_path):
             return {
                 'error': 'SHAP files not found'
             }
 
         shap_values = joblib.load(shap_path)
-        X_test = joblib.load(x_test_path)
+        X_test = get_x_test()
 
         return {
             'shap_summary_plot': plot_to_base64(lambda: plot_summary(shap_values, X_test)),
@@ -76,12 +76,11 @@ def plot_shap_specific_feature(feature):
         static_dir = os.path.abspath(os.path.join(base_dir, '../../static'))
 
         shap_path = os.path.join(static_dir, 'shap_values.pkl')
-        x_test_path = os.path.join(static_dir, 'X_test_shap.pkl')
 
-        if not os.path.exists(shap_path) or not os.path.exists(x_test_path):
+        if not os.path.exists(shap_path):
             return ''
         shap_values = joblib.load(shap_path)
-        X_test = joblib.load(x_test_path)
+        X_test = get_x_test()
 
         return plot_to_base64(lambda: plot_specific_feature(feature, shap_values, X_test))
     except Exception as e:
