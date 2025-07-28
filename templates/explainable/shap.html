@@ -108,6 +108,12 @@
                     <p class="text-sm text-gray-500">Tổng quan SHAP values</p>
                 </div>
             </div>
+            <p class="text-sm text-gray-600 mb-4">
+                Biểu đồ thể hiện mức độ quan trọng và chiều ảnh hưởng (tăng/giảm) của từng đặc trưng đến dự đoán <strong>quantity_sold</strong> của mô hình.
+                Mỗi chấm là một mẫu: màu <span class="text-red-500 font-medium">đỏ</span> biểu thị giá trị đặc trưng cao, <span class="text-blue-500 font-medium">xanh</span> là thấp.
+                Nếu chấm nằm bên phải (SHAP value dương), đặc trưng đó giúp <span class="text-green-600 font-medium">tăng</span> số lượng bán;
+                nếu nằm bên trái (SHAP value âm), nó góp phần <span class="text-red-600 font-medium">giảm</span> số lượng bán.
+            </p>
             <div id="shap-summary-plot"
                 class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl flex items-center justify-center border border-purple-100 flex justify-center items-center">
                 <div id="shap-summary-plot-loading" class="flex items-center justify-center h-64 animate-pulse">
@@ -141,6 +147,9 @@
                     </button>
                 </div>
             </div>
+            <p class="text-sm text-gray-600 mb-4">
+                Biểu đồ thể hiện ảnh hưởng của từng giá trị trong đặc trưng đã chọn tới dự đoán của mô hình.
+            </p>
             <div id="shap_specific_feature"
                 class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl flex items-center justify-center border border-purple-100 flex justify-center items-center">
                 <div id="shap_specific_feature-loading" class="flex items-center justify-center h-64 animate-pulse">
@@ -163,6 +172,9 @@
                 <p class="text-sm text-gray-500">Phân tích đóng góp của từng feature</p>
             </div>
         </div>
+        <p class="text-sm text-gray-600 mb-4">
+            Biểu đồ thể hiện các bước cộng dồn SHAP value từ giá trị trung bình đến dự đoán cuối cùng của mô hình. Màu đỏ = tăng đầu ra, màu xanh = giảm đầu ra.
+        </p>
         <div id="shap-waterfall-chart"
             class="px-6 py-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl flex items-center justify-center border border-purple-100 flex justify-center items-center">
             <div id="shap-waterfall-chart-loading" class="flex items-center justify-center h-96 animate-pulse">
@@ -170,6 +182,10 @@
                 <span class="ml-3 text-purple-700">Đang tạo SHAP Waterfall Chart...</span>
             </div>
         </div>
+    </div>
+
+    <div class="text-center text-sm text-gray-500 mt-10">
+        <p><strong>📌 Gợi ý:</strong> Hãy bắt đầu từ biểu đồ Summary để hiểu đặc trưng nào ảnh hưởng mạnh nhất. Sau đó dùng SHAP Feature để đào sâu và Waterfall Chart để hiểu dự đoán cụ thể.</p>
     </div>
     <script>
         async function explainFeature() {
